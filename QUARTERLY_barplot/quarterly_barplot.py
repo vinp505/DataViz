@@ -63,7 +63,7 @@ unique_sectors = unique_sectors[:8] + ['Real Estate', 'Technology', 'Utilities',
 # ---------------------------------------------------------------
 
 # height ratios are to give less space for the title
-fig, axes = plt.subplots(13, 1, figsize= (24, 136), gridspec_kw={'height_ratios': [0.2] + [1] * 12})
+fig, axes = plt.subplots(13, 1, figsize= (24, 136), gridspec_kw={'height_ratios': [0.2] + [1] * 12}, facecolor= '#F7F5F0')
 
 # work on title axis
 ax_t = axes[0]
@@ -103,7 +103,7 @@ ax_t.text(
             y=13, 
             s='████████  █████████',
             ha='left',
-            va='top', size= 24, weight= 550, zorder= 4, c= 'white')
+            va='top', size= 24, weight= 550, zorder= 4, c= '#F7F5F0')
 
 # description - colored text
 ax_t.text(
@@ -266,7 +266,7 @@ unique_sectors = unique_sectors[:8] + ['Real Estate', 'Technology', 'Utilities',
 # ---------------------------------------------------------------
 
 # height ratios are to give less space for the title
-fig, axes = plt.subplots(13, 1, figsize= (24, 136), gridspec_kw={'height_ratios': [0.2] + [1] * 12})
+fig, axes = plt.subplots(13, 1, figsize= (24, 136), gridspec_kw={'height_ratios': [0.2] + [1] * 12}, facecolor= '#F7F5F0')
 
 # work on title axis
 ax_t = axes[0]
@@ -306,7 +306,7 @@ ax_t.text(
             y=13, 
             s='████████  █████████',
             ha='left',
-            va='top', size= 24, weight= 550, zorder= 4, c= 'white')
+            va='top', size= 24, weight= 550, zorder= 4, c= '#F7F5F0')
 
 # description - colored text
 ax_t.text(
