@@ -1,0 +1,14 @@
+# .streamlit/config.toml
+
+[theme]
+# The exact warm paper color of your plot background
+backgroundColor = "#FAF9F6"
+
+# A slightly darker warm gray/beige for input widgets and the sidebar
+secondaryBackgroundColor = "#F4F3EF"
+
+# Your custom warm teal for buttons, sliders, and highlights
+primaryColor = "#4A9090"
+
+# Crisp black for highly readable text
+textColor = "#000000"
