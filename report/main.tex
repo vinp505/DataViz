@@ -1,0 +1,120 @@
+% !TEX program = xelatex
+\documentclass[10pt]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage{latexsym,amsfonts,amssymb,amsthm,amsmath,enumerate,systeme,multirow,listings,color,float,graphicx, array, booktabs}
+\usepackage{fancyhdr}
+\usepackage{style}
+
+\usepackage{times}
+\usepackage{url}
+\usepackage{latexsym}
+\usepackage{graphicx}
+\usepackage{svg}
+\usepackage[hidelinks]{hyperref}
+\usepackage{algpseudocode}
+\usepackage{amsmath}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{microtype}
+\usepackage{float}
+\usepackage[
+    left=2cm,
+    right=2cm,
+    top=2cm,
+    bottom=2cm
+]{geometry}
+
+\newcommand\given[1][]{\:#1\vert\:}
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+\lstset{
+  frame=tb,
+  language=Python,
+  aboveskip=5mm,
+  belowskip=5mm,
+  showstringspaces=false,
+  columns=flexible,
+  basicstyle={\small\ttfamily},
+  numbers=none,
+  numberstyle=\tiny\color{gray},
+  keywordstyle=\color{blue},
+  commentstyle=\color{dkgreen},
+  stringstyle=\color{mauve},
+  breaklines=true,
+  breakatwhitespace=true,
+  tabsize=3
+}
+
+\setlength{\parindent}{0in}
+\setlength{\oddsidemargin}{0in}
+\setlength{\textwidth}{6.5in}
+\setlength{\textheight}{8.8in}
+\setlength{\topmargin}{0in}
+\setlength{\headheight}{18pt}
+
+% --- Fix for missing ACL template definitions ---
+% 1. Define the missing titlebox length
+\newlength\titlebox
+\setlength\titlebox{3cm} % Standard height used in these templates
+
+% 2. Define the missing anonymization conditional
+\makeatletter
+\newif\ifacl@anonymize
+\acl@anonymizefalse % Change to \acl@anonymizetrue if you need to hide author names
+\makeatother
+% ------------------------------------------------
+
+
+\title{Data Visualisation and Data-driven Decision Making Project}
+\author{Bartosz Kochanski, Lukáš Trstenský, \and Vincenzo Piras \\
+        \{bako,lutr,vinp\}@itu.dk \\
+        \href{https://github.com/vinp505/DataViz}{Code on GitHub}}
+
+
+\definecolor{off-white}{HTML}{F7F5F0}
+\definecolor{main-text}{HTML}{2b2b2b}
+\pagecolor{off-white}
+\color{main-text}
+
+\usepackage{fontspec}
+\setmainfont{Arial}
+
+% \begin{table}[H]
+%     \centering
+%     \setlength{\tabcolsep}{4pt} % Adjust padding if needed
+%     \caption{Final model comparison}
+%     \begin{tabularx}{\columnwidth}{|l|X|l|}
+%         \hline
+%         \textbf{Model} & \textbf{Dataset} & \textbf{RMSE}$\pm$\textbf{CI} \\ \hline
+%         \texttt{STR}            & Non-vectorized & $5.551\pm1.7$ \\ \hline
+%         \texttt{MLP}       & Non-vectorized & $5.612\pm1.7$ \\ \hline
+%         \texttt{RFR}    & Non-vectorized & $5.744\pm1.6$ \\ \hline
+%         \texttt{XGB}     & Non-vectorized & $5.758\pm1.8$ \\ \hline
+%     \end{tabularx}
+%     \label{tab:final-model-comparison}
+% \end{table}
+
+% \begin{figure} [h]
+%     \centering
+%     \caption{Distributions of predicted and real power generation from the test set.}
+%     \includegraphics[width=1\linewidth]{plots/distributions_pred_vs_obs.pdf}
+%     \label{fig:pred-vs-real-dists}
+% \end{figure}
+
+% \begin{lstlisting}
+% def hello():
+%     print("hello")
+% \end{lstlisting}
+
+\begin{document}
+
+\maketitle
+Justify our great decisions. The greatest decisions ever made. There can never be better decisions than the ones we made, because we are the greatest decision makers on the planet. No one can compare to the way we make decisions.
+
+
+\end{document}

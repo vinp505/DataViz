@@ -1,0 +1,40 @@
+\let\Thanks\thanks % \Thanks and \thanks used to be different, but keep this for backwards compatibility.
+
+\newcommand\outauthor{%
+    \begin{tabular}[t]{c}
+    \ifacl@anonymize
+        \bfseries Anonymous ACL submission
+    \else
+        \bfseries\@author
+    \fi
+    \end{tabular}}
+
+\AtBeginDocument{
+\def\maketitle{\par
+ \begingroup
+   \def\thefootnote{\fnsymbol{footnote}}
+   \@maketitle % <-- Changed from \twocolumn[\@maketitle] to keep a single column
+   \@thanks
+ \endgroup
+ \setcounter{footnote}{0}
+ \let\maketitle\relax
+ \let\@maketitle\relax
+ \gdef\@thanks{}\gdef\@author{}\gdef\@title{}\let\thanks\relax}
+\def\@maketitle{\vbox to \titlebox{\hsize\textwidth
+ \linewidth\hsize \vskip 0.125in minus 0.125in \centering
+ {\Large\bfseries \@title \par} \vskip 0.2in plus 1fil minus 0.1in
+ {\def\and{\unskip\enspace{\rmfamily and}\enspace}%
+  \def\And{\end{tabular}\hss \egroup \hskip 1in plus 2fil
+           \hbox to 0pt\bgroup\hss \begin{tabular}[t]{c}\bfseries}%
+  \def\AND{\end{tabular}\hss\egroup \hfil\hfil\egroup
+          \vskip 0.25in plus 1fil minus 0.125in
+           \hbox to \linewidth\bgroup\large \hfil\hfil
+             \hbox to 0pt\bgroup\hss \begin{tabular}[t]{c}\bfseries}
+  \hbox to \linewidth\bgroup\large \hfil\hfil
+    \hbox to 0pt\bgroup\hss
+  \outauthor
+   \hss\egroup
+    \hfil\hfil\egroup}
+  \vskip 0.3in plus 2fil minus 0.1in
+}}
+}
