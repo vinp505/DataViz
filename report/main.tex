@@ -60,7 +60,7 @@
 % --- Fix for missing ACL template definitions ---
 % 1. Define the missing titlebox length
 \newlength\titlebox
-\setlength\titlebox{3cm} % Standard height used in these templates
+\setlength\titlebox{1.5cm} % Standard height used in these templates
 
 % 2. Define the missing anonymization conditional
 \makeatletter
@@ -76,9 +76,9 @@
         \href{https://github.com/vinp505/DataViz}{Code on GitHub}}
 
 
-\definecolor{off-white}{HTML}{F7F5F0}
+\definecolor{paper}{HTML}{F7F5F0}
 \definecolor{main-text}{HTML}{2b2b2b}
-\pagecolor{off-white}
+\pagecolor{paper}
 \color{main-text}
 
 \usepackage{fontspec}
@@ -114,7 +114,28 @@
 \begin{document}
 
 \maketitle
-Justify our great decisions. The greatest decisions ever made. There can never be better decisions than the ones we made, because we are the greatest decision makers on the planet. No one can compare to the way we make decisions.
+\section{Introduction}
+\label{sec:intro}
+We present four visualisations of historic stock market data~\cite{defeatbeta_yahoo_finance_data} from January 2019 to December 2025. These visualisations are ordered in terms of data granularity and are meant to represent different views of the stock market, from subjective personal feelings to objective hard realities. The first visualisation is an interactive exercise showing the disparity between short-term and long-term single-stock performance using line charts. The second visualisation is a heatmap of aggregate industry performance meant to express the waves of feelings that one experiences when trading day-to-day. The third is a bar chart showcasing quarterly sector performance starting to reveal the objective market performance. And lastly is an animated spiral line chart showing the true unfiltered reality of aggregate market performance.
 
+\section{Data Pre-processing}
+Data is first adjusted for inflation to the 2025 US Dollar. The data is then filtered based on the starting closing price of each stock and the average volume of each stock, keeping stocks above the 20th percentile for each parameter. This is done to prevent penny stocks from skewing the average price and change in percentage, especially as their importance in the market is highly negligible and only relevant for a small group of people and businesses.
+
+\section{Chart Decisions and Justification}
+When actively engaging in trading it is hard to rationalize the relatively short-term losses while seeing the overall performance of your portfolio, as even if you are up 15\% in the year a sudden 5\% loss feels devastating even if you are still up overall. Therefore, we decided to try and visualise this juxtaposition of subjective day-to-day feelings and objective long-term realities to implore the reader to stay level-headed when faced with short-term challenges whether trading stocks or in everyday life.
+
+\subsection{Short-term Long-term Disparity Exercise}
+With this exercise we use multiple single-stock line charts to try to model the day-to-day experience of trading stocks; looking at lines going up or down, trying to remain optimistic that your choices will result in profit and not loss, but also grounded when short-term spikes occur.
+
+\subsection{Daily Industry Performance Heatmap}
+With this chart we attempt to show the feeling associated with a slightly longer term and broader context, because once you get over the day-to-day single-stock market swings effecting your feelings you start diversifying and looking at slightly longer periods. Thus, we move from the day-to-day comparison of single-stocks to aggregate industry performance month-to-month, showcasing the waves that gains and losses come in.
+
+\subsection{Quarterly Sector Performance Bars}
+
+\subsection{Overall Spiral of Performance}
+
+
+\bibliographystyle{apalike}
+\bibliography{references}
 
 \end{document}
