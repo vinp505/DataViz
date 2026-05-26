@@ -165,7 +165,7 @@ plot_placeholder.markdown(
     }
     .loading-skeleton {
         width: 100%;
-        height: 363px; /* Adjust this to match your plot's relative height */
+        height: 361.5px; /* Adjust this to match your plot's relative height */
         background-color: #FAF9F6; /* Your warm gray secondary background */
         border: 2px dashed #B7B1A1;
         border-radius: 8px;
