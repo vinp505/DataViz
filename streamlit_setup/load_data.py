@@ -28,3 +28,7 @@ def lineplot_load_data():
             last_month = m
     
     return df_list, color_list, name_list, x_ticks, x_labels
+
+@st.cache_data
+def heatmap_load_data():
+    return pd.read_csv("datasets/sector_mom.csv", index_col= 'industry')

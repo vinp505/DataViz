@@ -1,9 +1,10 @@
 import streamlit as st
 import numpy as np
 import matplotlib.pyplot as plt
+import streamlit.components.v1 as components
 
-from load_data import lineplot_load_data
-from generate_plot import generate_week_lineplot, generate_final_lineplot, get_svg_html, generate_week_lineplot_title, get_scrollable_svg_html_inverted
+from load_data import lineplot_load_data, heatmap_load_data
+from generate_plot import generate_week_lineplot, generate_final_lineplot, get_svg_html, generate_week_lineplot_title, get_scrollable_svg_html_inverted, generate_heatmap, get_scrollable_svg_html, get_interactive_svg_html
 
 st.set_page_config(layout="wide")
 
@@ -87,6 +88,8 @@ if "weekly_lineplot_title" not in st.session_state:
     st.session_state["weekly_lineplot_title"] = None
 if "weekly_dates_html" not in st.session_state:
     st.session_state["weekly_dates_html"] = None
+if "heatmap_html" not in st.session_state:
+    st.session_state["heatmap_html"] = None
 
 if "weekly_plot_counter" not in st.session_state:
     st.session_state["weekly_plot_counter"] = 0
@@ -332,3 +335,52 @@ if st.session_state["finalized"]:
     
     else:
         st.write(st.session_state["final_lineplot_html"], unsafe_allow_html=True)
+    
+    st.header("P 2 - MoM Industry Heatmap", anchor= False)
+    st.write("Add text")
+    if st.session_state["heatmap_html"] is None:
+        plot_placeholder_3 = st.empty()
+        
+        plot_placeholder_3.markdown(
+            """
+            <style>
+            @keyframes pulse {
+                0% { opacity: 0.6; }
+                50% { opacity: 1.0; }
+                100% { opacity: 0.6; }
+            }
+            .loading-skeleton {
+                width: 100%;
+                height: 500px; /* Matched to the scrollable container height */
+                background-color: #FAF9F6; 
+                border: 2px dashed #B7B1A1;
+                border-radius: 8px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                color: #B7B1A1;
+                font-family: sans-serif;
+                font-weight: bold;
+                animation: pulse 1.5s infinite ease-in-out;
+                margin-top: 20px;
+                margin-bottom: 20px;
+            }
+            </style>
+            <div class="loading-skeleton">
+                Generating visualization...
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+        df_mom = heatmap_load_data()
+        fig = generate_heatmap(df_mom)
+        
+        st.session_state["heatmap_html"] = get_scrollable_svg_html(fig)
+        plot_placeholder_3.write(st.session_state["heatmap_html"], unsafe_allow_html=True)
+        plt.close(fig)
+    
+    else:
+        st.write(st.session_state["heatmap_html"], unsafe_allow_html=True)
+    
+
