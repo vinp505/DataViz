@@ -2,7 +2,7 @@ import streamlit as st
 import numpy as np
 import matplotlib.pyplot as plt
 
-from load_data import load_data
+from load_data import lineplot_load_data
 from generate_plot import generate_week_lineplot, generate_final_lineplot, get_svg_html, generate_week_lineplot_title, get_scrollable_svg_html_inverted
 
 st.set_page_config(layout="wide")
@@ -115,7 +115,7 @@ st.header("P1 - Individual Stocks", anchor= False)
 st.write("Add paragraph about: 1. concept 2. plot 3. game")
 st.subheader("P1.1 - Weekly Stock Data", anchor= False)
 
-df_list, color_list, name_list, x_ticks, x_labels = load_data()
+df_list, color_list, name_list, x_ticks, x_labels = lineplot_load_data()
 
 col1, col2, col3 = st.columns([3, 2, 7], vertical_alignment="center")
 
