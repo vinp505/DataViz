@@ -76,7 +76,8 @@ def generate_week_lineplot_title(color_list):
         if i <= 3:
             ax.set_xlim(-5, 5)
             ax.set_ylim(-1, 1)
-            ax.text(x= 0, y= -0.8, s= f"Stock {i+1}", c= color_list[i], ha= 'center', weight= 550, size= 50)
+            ax.text(x= 0, y= -0.8, s= f"Stock {i+1}", c= '#000000', ha= 'center', weight= 550, size= 50)
+            #ax.text(x= 0, y= -0.8, s= f"Stock {i+1}", c= color_list[i], ha= 'center', weight= 550, size= 50)
             ax.hlines(y= -1, xmin= -1.5, xmax= 1.5, colors= 'black', linewidth= 8, clip_on= False)
     
     return fig
@@ -96,7 +97,7 @@ def generate_week_lineplot(df_list, color_list, seed):
         df_week = df.iloc[w-14 : w].copy()
         baseline = df_week['close'].values[0]
         df_week['week close (%)'] = ((df_week['close'] - baseline) / baseline) * 100
-        df_week.head(10)
+        
         cmin = df_week['week close (%)'].min()
         cmax = df_week['week close (%)'].max()
 
@@ -139,11 +140,11 @@ def generate_week_lineplot(df_list, color_list, seed):
 
 
         if close_min*0.4 < -0.8 or (close_max - close_min) < 15:
-            ax.text(x=len(df_week)+2.3, y=round(close_min*0.8, 0) - abs(close_min)*0.01, s=f"{(close_min*0.8):.0f}%", c= '#C8C8C7', ha='center', weight= 550, size= 25)
+            ax.text(x=len(df_week)+2.3, y=round(close_min*0.8, 0) - abs(close_min)*0.01, s=f"{(close_min*0.8):.0f}%", c= '#C8C8C7', ha='center', weight= 550, size= 35)
         
         if close_max*0.4 > 0.8 or (close_max - close_min) < 15:
-            ax.text(x=len(df_week)+2.3, y=round(close_max*0.8, 0) - abs(close_max)*0.01, s=f"{'+' * (float(close_max) > 0)}{(close_max*0.8):.0f}%", c= '#C8C8C7', ha='center', weight= 550, size= 25)
-        ax.text(x= len(df_week)+2.3, y= -0.1, s= '0%', c= 'black', ha='center', weight= 550, size= 25)
+            ax.text(x=len(df_week)+2.3, y=round(close_max*0.8, 0) - abs(close_max)*0.01, s=f"{'+' * (float(close_max) > 0)}{(close_max*0.8):.0f}%", c= '#C8C8C7', ha='center', weight= 550, size= 35)
+        ax.text(x= len(df_week)+2.3, y= -0.1, s= '0%', c= 'black', ha='center', weight= 550, size= 35)
             
         ax.hlines(y= 0, xmin= -1, xmax= len(df_week), linewidth= 5, colors= 'black')
         ax.scatter([0, 13], [0, df_week['week close (%)'].values[-1]], c= color_list[i], s= 300, zorder= 5)
