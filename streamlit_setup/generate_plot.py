@@ -6,6 +6,44 @@ from io import StringIO
 import regex as re
 import streamlit.components.v1 as components
 
+def get_open_scrollable_svg_html_inverted(fig, height=500):
+    """Saves a figure as SVG and wraps it in a scrollable container initialized at the bottom."""
+    imgdata = StringIO()
+    fig.savefig(imgdata, format="svg", bbox_inches="tight")
+    imgdata.seek(0)
+    svg_string = imgdata.getvalue()
+    
+    b64 = base64.b64encode(svg_string.encode('utf-8')).decode("utf-8")
+    
+    # By using flex-direction: column-reverse, the scrollbar starts at the bottom
+    html = f"""
+    <div style="
+        height: {height}px; 
+        overflow-y: auto; 
+        display: flex;
+        flex-direction: column-reverse;
+        border-left: 2px solid #000000;
+        background-color: #FAF9F6;
+    ">
+        <img src="data:image/svg+xml;base64,{b64}" style="width: 100%; height: auto; display: block;"/>
+    </div>
+
+    <div style="
+            position: absolute; 
+            left: -30px; 
+            top: 50%; 
+            transform: translateY(-50%); 
+            font-size: 24px; 
+            color: #000000; 
+            pointer-events: none; 
+            opacity: 1;
+            user-select: none;
+        ">
+            ↕
+        </div>
+    """
+    return html
+
 def get_interactive_svg_html(fig):
     """Saves a Matplotlib figure as an SVG and wraps it with svg-pan-zoom.js inside an HTML document."""
     # 1. Save figure to an in-memory text buffer

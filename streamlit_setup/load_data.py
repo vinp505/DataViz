@@ -8,7 +8,7 @@ def lineplot_load_data():
     color_list = ['#0066cc', '#C41230', '#00AA4B', '#FFCF06']
     name_list = ['Apple', 'AGCO', 'Archer Daniels Midland', 'Advance Auto Parts']
 
-    for symbol in ['AAPL', 'ADM', 'AAP', 'AGCO']:
+    for symbol in ['AAPL', 'AGCO', 'ADM', 'AAP']:
         df = pd.read_csv(f"datasets/df_{symbol}.csv")
         df_list.append(df)
 
