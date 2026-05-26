@@ -23,6 +23,7 @@ def get_open_scrollable_svg_html_inverted(fig, height=500):
         display: flex;
         flex-direction: column-reverse;
         border-left: 2px solid #000000;
+        border-radius: 8px;
         background-color: #FAF9F6;
     ">
         <img src="data:image/svg+xml;base64,{b64}" style="width: 100%; height: auto; display: block;"/>
