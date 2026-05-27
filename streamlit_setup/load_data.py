@@ -32,3 +32,9 @@ def lineplot_load_data():
 @st.cache_data
 def heatmap_load_data():
     return pd.read_csv("datasets/sector_mom.csv", index_col= 'industry')
+
+@st.cache_data
+def barplot_load_data(df_suffix: str = "20th"):
+    df = pd.read_csv(f"datasets/barplot/df_grouped_lday_abs-20th-{df_suffix}.csv", index_col= ['report_quarter', 'sector'])
+    baseline = pd.read_csv(f"datasets/barplot/avg_close_2019-20th-{df_suffix}.csv", index_col= ['report_date', 'sector'])
+    return df, baseline

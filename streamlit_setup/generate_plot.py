@@ -4,7 +4,92 @@ import base64
 import matplotlib.colors as mcolors
 from io import StringIO
 import regex as re
-import streamlit.components.v1 as components
+
+def get_aligned_text_row(text: list | str, alignments: list | str, left_padding="6.5%", right_padding="3.5%", font_size= "16", margin_top= "20", margin_bottom= "20", line_width = None, line_thickness= None, line_fade=True):
+    """Generates a horizontally aligned row of text elements with zero markdown indentation risk."""
+    if isinstance(text, str):
+        text = [text]
+    if isinstance(alignments, str):
+        alignments = [alignments]
+    assert len(text) == len(alignments)
+    items_list = []
+    for i, t in enumerate(text):
+        # Determine the line's margin and gradient direction based on alignment
+        if alignments[i] == "right":
+            direction = "to left"
+            margin_style = "margin: 4px 0 0 auto;"
+        elif alignments[i] == "center":
+            direction = "to right"
+            margin_style = "margin: 4px auto 0 auto;"
+        else: # "left"
+            direction = "to right"
+            margin_style = "margin: 4px 0 0 0;"
+            
+        # Apply either a fading linear-gradient or a solid background color
+        if line_fade:
+            background_style = f"background: linear-gradient({direction}, #000000, transparent);"
+        else:
+            background_style = f"background-color: #000000;"
+            
+        # Build the line HTML block if a width is specified
+        line_html = f'<div style="width: {line_width}; height: {line_thickness}; {background_style} {margin_style}"></div>' if line_width else ''
+        
+        # Wrap the text and the line in a vertical flex block
+        item = f"""
+        <div style="flex: 1; text-align: {alignments[i]}; font-family: sans-serif; font-weight: bold; font-size: {font_size}px; color: #000000; display: flex; flex-direction: column;">
+            <span>{t}</span>
+            {line_html}
+        </div>
+        """
+        items_list.append(item)
+        
+    # Flatten the HTML into a single line to prevent Streamlit Markdown bugs
+    items_html = "".join(items_list).replace("\n", "").replace("  ", "")
+    
+    # Wrap in the main flex container
+    html = f'<div style="display: flex; justify-content: space-between; width: 100%; padding-left: {left_padding}; padding-right: {right_padding}; box-sizing: border-box; margin-bottom: {margin_bottom}px; margin-top: {margin_top}px;">{items_html}</div>'
+    html = html.replace("\n", "").replace("  ", "")
+    
+    return html
+
+def get_open_scrollable_svg_html(fig, height=500, padding_topbottom= "10", padding_leftright = "20"):
+    """Saves a figure as SVG and wraps it in a scrollable container initialized at the bottom."""
+    imgdata = StringIO()
+    fig.savefig(imgdata, format="svg", bbox_inches="tight")
+    imgdata.seek(0)
+    svg_string = imgdata.getvalue()
+    
+    b64 = base64.b64encode(svg_string.encode('utf-8')).decode("utf-8")
+    
+    # By using flex-direction: column-reverse, the scrollbar starts at the bottom
+    html = f"""
+    <div style="
+        height: {height}px; 
+        overflow-y: auto;
+        border-left: 3.5px solid #000000;
+        border-radius: 8px;
+        background-color: #FAF9F6;
+        padding: {padding_topbottom}px {padding_leftright}px;             /* Adds a clean 15px gap on all sides */
+        box-sizing: border-box;    /* Prevents padding from increasing container height */
+    ">
+        <img src="data:image/svg+xml;base64,{b64}" style="width: 100%; height: auto; display: block;"/>
+    </div>
+
+    <div style="
+            position: absolute; 
+            left: -30px; 
+            top: 50%; 
+            transform: translateY(-50%); 
+            font-size: 24px; 
+            color: #000000; 
+            pointer-events: none; 
+            opacity: 1;
+            user-select: none;
+        ">
+            ⬍
+        </div>
+    """
+    return html
 
 def get_open_scrollable_svg_html_inverted(fig, height=500):
     """Saves a figure as SVG and wraps it in a scrollable container initialized at the bottom."""
@@ -22,7 +107,7 @@ def get_open_scrollable_svg_html_inverted(fig, height=500):
         overflow-y: auto; 
         display: flex;
         flex-direction: column-reverse;
-        border-left: 2px solid #000000;
+        border-left: 3.5px solid #000000;
         border-radius: 8px;
         background-color: #FAF9F6;
     ">
@@ -40,7 +125,7 @@ def get_open_scrollable_svg_html_inverted(fig, height=500):
             opacity: 1;
             user-select: none;
         ">
-            ↕
+            ⬍
         </div>
     """
     return html
@@ -190,7 +275,6 @@ def generate_week_lineplot_title(color_list):
     for i, ax in enumerate(axes.flatten()):
 
         ax.axis('off')
-        
         if i <= 3:
             ax.set_xlim(-5, 5)
             ax.set_ylim(-1, 1)
@@ -243,10 +327,9 @@ def generate_week_lineplot(df_list, color_list, seed):
     for i, ax in enumerate(axes):
 
         ax.axis('off')
-
         ax.set_ylim(close_min - 1, close_max + 1)
         #ax.set_xlim(-2, len(df_week))
-
+        #ax.vlines(x= len(df_week)/2, ymin= -100, ymax= 100, colors= 'black')
         df_week = df_week_list[i]
 
         # ROUND VALS TO INTEGERS
@@ -255,17 +338,18 @@ def generate_week_lineplot(df_list, color_list, seed):
         ax.hlines(y = round(close_min*0.8, 0), xmin= -1, xmax = len(df_week), linewidth= 3, colors= '#C8C8C7')
         ax.hlines(y = round(close_max*0.8, 0)/2, xmin= -1, xmax = len(df_week), linewidth= 3, colors= '#C8C8C7')
         ax.hlines(y = round(close_max*0.8, 0), xmin= -1, xmax = len(df_week), linewidth= 3, colors= '#C8C8C7')
-
-
-        if close_min*0.4 < -0.8 or (close_max - close_min) < 15:
-            ax.text(x=len(df_week)+2.3, y=round(close_min*0.8, 0) - abs(close_min)*0.01, s=f"{(close_min*0.8):.0f}%", c= '#C8C8C7', ha='center', weight= 550, size= 35)
-        
-        if close_max*0.4 > 0.8 or (close_max - close_min) < 15:
-            ax.text(x=len(df_week)+2.3, y=round(close_max*0.8, 0) - abs(close_max)*0.01, s=f"{'+' * (float(close_max) > 0)}{(close_max*0.8):.0f}%", c= '#C8C8C7', ha='center', weight= 550, size= 35)
-        ax.text(x= len(df_week)+2.3, y= -0.1, s= '0%', c= 'black', ha='center', weight= 550, size= 35)
+        #ax.vlines(x = len(df_week)/2, ymin=-100, ymax= 100, colors= 'black')
+        if i < 3:
+            if close_min*0.4 < -0.8 or (close_max - close_min) < 15:
+                ax.text(x=len(df_week)+2.3, y=round(close_min*0.8, 0) - abs(close_min)*0.01, s=f"{(close_min*0.8):.0f}%", c= '#C8C8C7', ha='center', weight= 550, size= 30)
+            
+            if close_max*0.4 > 0.8 or (close_max - close_min) < 15:
+                ax.text(x=len(df_week)+2.3, y=round(close_max*0.8, 0) - abs(close_max)*0.01, s=f"{'+' * (float(close_max) > 0)}{(close_max*0.8):.0f}%", c= '#C8C8C7', ha='center', weight= 550, size= 30)
+            ax.text(x= len(df_week)+2.3, y= -0.1, s= '0%', c= 'black', ha='center', weight= 550, size= 30)
             
         ax.hlines(y= 0, xmin= -1, xmax= len(df_week), linewidth= 5, colors= 'black')
-        ax.scatter([0, 13], [0, df_week['week close (%)'].values[-1]], c= color_list[i], s= 300, zorder= 5)
+        ax.scatter([0, 13], [0, df_week['week close (%)'].values[-1]], c= color_list[i%4], s= 300, zorder= 5)
+        ax.scatter([14], [0], c= '#000000', s= 300, marker= '>', zorder= 4)
         ax.plot(range(len(df_week)), df_week['week close (%)'], c= color_list[i], linewidth= 10)
 
     date_1, date_2 = df_week['report_date'].values[0], df_week['report_date'].values[-1]
@@ -282,12 +366,12 @@ def generate_final_lineplot(df_list, color_list, name_list, x_ticks, x_labels):
         
         ax.text(x= 211, y= 170, s= f'Stock {i+1}: ', c= 'black', ha= 'right', size= 'large', weight= 550)
         ax.text(x= 215, y= 170, s= name_list[i], c= color_list[i], ha= 'left', size= 'x-large', weight= 'heavy')
-        ax.text(x=-15, y=5, s="0%", c= 'black', ha='center', weight= 550) #, ha='center', family='serif', fontname='Arial')
-        ax.text(x=-15, y=55, s=" +50%", c= '#C8C8C7', ha='center', weight= 550)
-        ax.text(x=-15, y=105, s="+100%", c= '#C8C8C7', ha='center', weight= 550)
-        ax.text(x=-15, y=155, s="+150%", c= '#C8C8C7', ha='center', weight= 550)
-        ax.text(x=-15, y=-45, s=" -50%", c= '#C8C8C7', ha='center', weight= 550)
-        ax.text(x=-15, y=-95, s="-100%", c= '#C8C8C7', ha='center', weight= 550)
+        ax.text(x=-15, y=5, s="0%", c= 'black', ha='center', weight= 550, size= 8) #, ha='center', family='serif', fontname='Arial')
+        ax.text(x=-15, y=55, s=" +50%", c= '#C8C8C7', ha='center', weight= 550, size= 8)
+        ax.text(x=-15, y=105, s="+100%", c= '#C8C8C7', ha='center', weight= 550, size= 8)
+        ax.text(x=-15, y=155, s="+150%", c= '#C8C8C7', ha='center', weight= 550, size= 8)
+        ax.text(x=-15, y=-45, s=" -50%", c= '#C8C8C7', ha='center', weight= 550, size= 8)
+        ax.text(x=-15, y=-95, s="-100%", c= '#C8C8C7', ha='center', weight= 550, size= 8)
 
         ax.hlines(y=0, xmin=0, xmax=1759, colors='black')
         ax.hlines(y=25, xmin=0, xmax=1759, colors='#E1E1DD', linewidth= 0.8)
@@ -378,20 +462,20 @@ def generate_heatmap(sector_mom):
 
     # ── layout ──────────────────────────────────────────────────────────────
     cell_h   = 0.52
-    fig_w    = max(18, n_mo * 0.035 + 4)
+    fig_w    = max(18, n_mo * 0.032 + 4)
     fig_h    = max(7, n_sectors * cell_h + 3.6)   # +0.4 for extra header room
     header_h = 1.5                                  # fixed inches — enough for any fig_h
     footer_h = 0.45
-    T = 1.0 - header_h / fig_h
-    B = footer_h / fig_h
-
+    T = 1.0 - (header_h / fig_h)*3
+    B = footer_h*3 / fig_h
+    print(fig_w)
     FACE = "#FAF9F6"
     fig, ax = plt.subplots(figsize=(fig_w, fig_h), facecolor=FACE)
-    fig.subplots_adjust(top=T, bottom=B, left=0.18, right=0.985)
+    fig.subplots_adjust(top= 1, bottom= 0, left=0, right=1)
     ax.set_facecolor(FACE)
-
+    ax.axis("off")
     # ── colormap (unchanged) ─────────────────────────────────────────────────
-    red, grey, green = '#D06A4C', FACE, '#4A9090'
+    red, grey, green = '#FAAC68', FACE, '#5A9CB5'
     cmap = mcolors.LinearSegmentedColormap.from_list('RdGrGn', [red, grey, green])
 
     im = ax.imshow(
@@ -402,35 +486,40 @@ def generate_heatmap(sector_mom):
     )
 
     # ── y-axis ───────────────────────────────────────────────────────────────
-    ax.set_yticks(range(n_sectors))
-    ax.set_yticklabels(sector_mom.index, fontsize=10, va='center',
-                       fontfamily='monospace')
-    ax.tick_params(axis='y', length=0, pad=6)
+    # ax.set_yticks(range(n_sectors))
+    # ax.set_yticklabels(sector_mom.index, fontsize=10, va='center',
+    #                    fontfamily='monospace')
+    # ax.tick_params(axis='y', length=0, pad=6)
 
     # ── x-axis (top) ─────────────────────────────────────────────────────────
     # step = 365
     # tick_pos = list(range(0, n_mo, step))
     
-    tick_pos = [0]
-    x_labels = ['2019']
-    last_month = '12'
-    for i, val in enumerate(dates):
-            y, m, d = str(val).split('-')
-            if m == '01' and last_month == '12':
-                tick_pos.append(i)
-                x_labels.append(y)
+    # tick_pos = [0]
+    # x_labels = ['2019']
+    # last_month = '12'
+    # for i, val in enumerate(dates):
+    #         y, m, d = str(val).split('-')
+    #         if m == '01' and last_month == '12':
+    #             tick_pos.append(i)
+    #             x_labels.append(y)
 
-            # elif int(m) % 2 == 0 and int(last_month) % 2 == 1:
-            #     tick_pos.append(i)
-            #     x_labels.append(m)
+    #         # elif int(m) % 2 == 0 and int(last_month) % 2 == 1:
+    #         #     tick_pos.append(i)
+    #         #     x_labels.append(m)
             
-            last_month = m
+    #         last_month = m
+
+    # for t in tick_pos[1:]:
+    #      ax.vlines(x= t-10, ymin= -0.5, ymax= 30, colors= 'black', linewidth= 2)
+    #      ax.vlines(x= t, ymin= -0.5, ymax= 30, colors= 'black', linewidth= 2)
     
-    ax.set_xticks(tick_pos)
-    ax.set_xticklabels(
-        x_labels,
-        fontsize=8, ha='center', rotation=0, color='#444444'
-    )
+    # ax.vlines(x= len(dates)-11, ymin= -0.5, ymax= 30, colors= 'black', linewidth= 2)
+    # ax.set_xticks(tick_pos)
+    # ax.set_xticklabels(
+    #     x_labels,
+    #     fontsize=8, ha='center', rotation=0, color='#444444'
+    # )
     # ax.set_xticklabels(
     #     [dates[i].strftime('%y') for i in tick_pos],
     #     fontsize=8, ha='center', rotation=0, color='#444444'
@@ -481,4 +570,84 @@ def generate_heatmap(sector_mom):
     # plt.savefig(out, dpi=150, bbox_inches='tight', facecolor=FACE)
     # print(f'Saved → {out}')
     #plt.show()
+    return fig
+
+def generate_barplot(df, avg_close, ticks_2019: bool = False):
+
+    baseline_sector_avg = {item[0][1] : item[1] for item in avg_close['average close'].items()}
+    quarters = set([k[0] for k in df['average close'].keys()])
+    sectors = [k[1] for k in df['average close'].keys()]
+    values = df['average close'].values
+    unique_sectors = sorted(baseline_sector_avg.keys())
+    unique_sectors = unique_sectors[:8] + ['Real Estate', 'Technology', 'Utilities']
+    
+    fig, axes = plt.subplots(11, 1, figsize= (24, 80), facecolor= '#FAF9F6')
+    fig.subplots_adjust(
+        top=0.98, 
+        bottom=0.02, 
+        hspace=0.08  # Adjust this to control the vertical spacing *between* the 11 subplots
+    )
+
+    for i, sec in enumerate(unique_sectors):
+
+        ax = axes[i]
+        ax.set_ylim(-60, 60)
+
+        ax.hlines(y=10, xmin=-0.7, xmax=27.7, colors='#E1E1DD', linewidth= 0.8, zorder= 0)
+        ax.hlines(y=20, xmin=-0.7, xmax=27.7, colors='#C8C8C7', linewidth= 1.3, zorder= 0)
+        ax.hlines(y=30, xmin=-0.7, xmax=27.7, colors='#E1E1DD', linewidth= 0.8, zorder= 0)
+        ax.hlines(y=40, xmin=-0.7, xmax=27.7, colors='#C8C8C7', linewidth= 1.3, zorder= 0)
+        ax.hlines(y=50, xmin=-0.7, xmax=27.7, colors='#E1E1DD', linewidth= 0.8, zorder= 0)
+        ax.hlines(y=-10, xmin=-0.7, xmax=27.7, colors='#E1E1DD', linewidth= 0.8, zorder= 0)
+        ax.hlines(y=-20, xmin=-0.7, xmax=27.7, colors='#C8C8C7', linewidth= 1.3, zorder= 0)
+        ax.hlines(y=-30, xmin=-0.7, xmax=27.7, colors='#E1E1DD', linewidth= 0.8, zorder= 0)
+        ax.hlines(y=-40, xmin=-0.7, xmax=27.7, colors='#C8C8C7', linewidth= 1.3, zorder= 0)
+
+        ax.text(x= -1.4, y=1, s="0%", c= 'black', ha='left', weight= 550)
+        ax.text(x= -1.8, y=19.2, s="+20%", c= '#C8C8C7', ha='left', weight= 550)
+        ax.text(x= -1.8, y=39.2, s="+40%", c= '#C8C8C7', ha='left', weight= 550)
+        ax.text(x= -1.8, y=-20.8, s="-20%", c= '#C8C8C7', ha='left', weight= 550)
+        ax.text(x= -1.8, y=-40.8, s="-40%", c= '#C8C8C7', ha='left', weight= 550)
+
+        ax.text(x= 28.8, y=19.2, s="+20%", c= '#C8C8C7', ha='right', weight= 550)
+        ax.text(x= 28.8, y=39.2, s="+40%", c= '#C8C8C7', ha='right', weight= 550)
+        ax.text(x= 28.8, y=-20.8, s="-20%", c= '#C8C8C7', ha='right', weight= 550)
+        ax.text(x= 28.8, y=-40.8, s="-40%", c= '#C8C8C7', ha='right', weight= 550)
+
+        sec_values = [values[i] for i in range(len(sectors)) if sectors[i] == sec]
+        sec_values_lday_perc = [((values[i] - baseline_sector_avg[sec]) / baseline_sector_avg[sec]) * 100 for i in range(len(sectors)) if sectors[i] == sec]
+        diff_Q = [0] + [((sec_values[i] - sec_values[i-1]) / sec_values[i-1]) * 100 for i in range(1, len(sec_values))]
+        
+
+        colors = ["#5A9CB5" if diff_Q[j] > 0 else "#FAAC68" for j in range(len(diff_Q))]
+        
+        bars2 = ax.bar(range(len(diff_Q)), diff_Q, color= colors)
+        for i, val in enumerate(sec_values_lday_perc):
+            q = str(i%4+1)
+
+            if ticks_2019:
+                c = "#484848" if (val > 90) or ((val < -45) and (val > -55)) else "#000000"
+                ax.hlines(y=val, xmin= i-0.33, xmax= i+0.3, colors= c, linewidth= 3.3, clip_on=False)
+            ax.text(
+                x=i, 
+                y=-48.2, 
+                s='Q' + q,
+                ha='center',
+                va='top', size= 'medium', weight= 550, zorder= 4)
+
+        for x, yr in [(1, '2019'), (5, '2020'), (9, '2021'), (13, '2022'), (17, '2023'), (21, '2024'), (25, '2025')]:
+            ax.hlines(y=-51.7, xmin= x-1.05, xmax= x+2.05, colors= 'black', linewidth= 1.6, zorder= 4)
+
+            ax.text(
+                x=x+0.5, 
+                y=-53, 
+                s=yr,
+                ha='center',
+                va='top', size= 'large', weight= 550, zorder= 4)
+
+        ax.hlines(y=0, xmin=-1.3, xmax=28.3, colors='black', linewidth= 1.6, zorder= 4)
+        ax.hlines(y=-47, xmin=-1.3, xmax=28.3, colors='black', linewidth= 1.6, zorder= 4)
+        ax.text(x=0, y=+34, s=sec, c= 'black', ha='left', size= 'x-large', weight= 'heavy')
+        ax.axis('off')
+        
     return fig
