@@ -4,74 +4,52 @@ import matplotlib.pyplot as plt
 import streamlit.components.v1 as components
 import time
 
-from load_data import lineplot_load_data, heatmap_load_data
-from generate_plot import generate_week_lineplot, generate_final_lineplot, get_svg_html, generate_week_lineplot_title, get_scrollable_svg_html_inverted, generate_heatmap, get_scrollable_svg_html, get_interactive_svg_html, get_open_scrollable_svg_html_inverted
+from load_data import lineplot_load_data, heatmap_load_data, barplot_load_data
+from generate_plot import get_aligned_text_row, generate_week_lineplot, generate_final_lineplot, get_svg_html, generate_week_lineplot_title, get_scrollable_svg_html_inverted, generate_heatmap, get_scrollable_svg_html, get_interactive_svg_html, get_open_scrollable_svg_html_inverted, get_open_scrollable_svg_html, generate_barplot
 
 st.set_page_config(layout="wide")
-
-
-# st.markdown("""
-#     <style>
-#     /* Remove the box styling from the Streamlit button */
-#     div[data-testid="stButton"] button {
-#         background-color: transparent !important;
-#         border: none !important;
-#         color: #4A9090 !important; /* Your custom warm teal */
-#         text-decoration: underline !important;
-#         padding: 0 !important;
-#         font-weight: bold !important;
-#         box-shadow: none !important;
-#         font-size: 16px !important;
-#     }
-    
-#     /* Change the color on hover without showing a background box */
-#     div[data-testid="stButton"] button:hover {
-#         color: #c01127 !important; /* Hover state red */
-#         background-color: transparent !important;
-#         text-decoration: underline !important;
-#     }
-    
-#     /* Ensure the disabled state looks clean */
-#     div[data-testid="stButton"] button:disabled {
-#         color: #C8C8C7 !important;
-#         text-decoration: none !important;
-#     }
-            
-#     /* Force elements to maintain 100% opacity during a rerun */
-#     div[data-stale="true"] {
-#         opacity: 1.0 !important;
-#         filter: none !important;
-#     }
-            
-#     </style>
-# """, unsafe_allow_html=True)
 
 st.markdown("""
     <style>
     div[data-testid="stButton"] button {
-        background-color: #FAF9F6 !important; /* Button background color */
-        color: #3A6E6E !important;               /* Text color inside the box */
-        border: 2px solid #3A6E6E !important;  /* Optional: Border color */
+        background-color: #BF8755 !important; /* Button background color */
+        color: #FAF9F6 !important;               /* Text color inside the box */
+        border: 2px solid #BF8755 !important;  /* Optional: Border color */
         border-radius: 6px !important;         /* Corner roundness */
         font-weight: bold !important;
-        transition: background-color 0.2s ease, border-color 0.2s ease !important;
+        transition: background-color 0.5s ease, border-color 0.5s ease !important;
     }
     
     /* 2. Style when Hovering over the Button Box */
     div[data-testid="stButton"] button:hover {
-        background-color: #b44801 !important; /* Hover background color (Red) */
-        border-color: #973c01 !important;     /* Hover border color */
-        color: white !important;
+        background-color: #D38949 !important; /* Hover background color (Red) */
+        border-color: #D38949 !important;     /* Hover border color */
+        color: #FAF9F6 !important;
     }
             
     /* Ensure the disabled state looks clean */
     div[data-testid="stButton"] button:disabled {
-        color: #C8C8C7 !important;
-        background-color: transparent !important;
-        border-color: #C8C8C7 !important;
+        color: #FAF9F6 !important;
+        background-color: #E6DCD2 !important;
+        border-color: #E6DCD2 !important;
         text-decoration: none !important;
     }
-            
+
+    .stSelectbox div[data-baseweb="select"] > div:first-child {
+        border-color: #BF8755 !important; /* Your custom border color (e.g. Teal) */
+    }
+
+    /* 2. Border color on Hover */
+    .stSelectbox div[data-baseweb="select"]:hover > div:first-child {
+        border-color: #D38949 !important; /* Hover border color (e.g. Red) */
+    }
+
+    /* 3. Border color when Focused (Clicked / Dropdown is open) */
+    .stSelectbox div[data-baseweb="select"] > div:focus-within {
+        border-color: #D38949 !important;
+        box-shadow: 0 0 0 1px #D38949 !important; /* Optional: Highlights the border halo */
+    }
+                 
     /* Force elements to maintain 100% opacity during a rerun */
     div[data-stale="true"] {
         opacity: 1.0 !important;
@@ -85,12 +63,15 @@ if "final_lineplot_html" not in st.session_state:
     st.session_state["final_lineplot_html"] = None
 if "weekly_lineplot_html" not in st.session_state:
     st.session_state["weekly_lineplot_html"] = None
-if "weekly_lineplot_title" not in st.session_state:
-    st.session_state["weekly_lineplot_title"] = None
+
 if "weekly_dates_html" not in st.session_state:
     st.session_state["weekly_dates_html"] = None
 if "heatmap_html" not in st.session_state:
     st.session_state["heatmap_html"] = None
+if "barplots_html" not in st.session_state:
+    st.session_state["barplots_html"] = []
+if "barplots_idx" not in st.session_state:
+    st.session_state["barplots_idx"] = 0
 
 if "weekly_plot_counter" not in st.session_state:
     st.session_state["weekly_plot_counter"] = 0
@@ -114,14 +95,24 @@ st.title("Zooming Out: How Time and Category Granularity can affect the percepti
 st.subheader("A Data Visualization Project by ...", anchor= False)
 st.write("Add introduction")
 
-st.header("P1 - Individual Stocks", anchor= False)
+st.space(20)
+st.header("P1 — Individual Stocks", anchor= False)
 #st.write("Stocks are volatile, and putting your trust in a single title requires confidence.\nBelow are plots summarizing the performance of four selected stocks across a randomly selected 2-week period, together with a button to change the time window.\nFeel free to create as many snapshot as you need to take a responsible decision: order the plots in the drop down menu from what you think it's the most profitable stock to the most harmful. Once you are happy with your selection, click the button on the side to reveal the complete line plots for each of the stocks.")
 st.write("Add paragraph about: 1. concept 2. plot 3. game")
-st.subheader("P1.1 - Weekly Stock Data", anchor= False)
+
+st.space(10)
+st.subheader("P1.1 — Weekly Stock Data", anchor= False)
 
 df_list, color_list, name_list, x_ticks, x_labels = lineplot_load_data()
 
 col1, col2, col3 = st.columns([3, 2, 7], vertical_alignment="center")
+
+text_list = ['Stock 1', 'Stock 2', 'Stock 3', 'Stock 4']
+cols = st.columns([1, 1, 1, 1], vertical_alignment= "center")
+for text, col, lpad in zip(text_list, cols, ["38.5%", "41%", "44%", "47%"]):
+    with col:
+        text_html = get_aligned_text_row(text, alignments= 'left', left_padding= lpad, font_size= "19", margin_bottom= "0")
+        st.markdown(text_html, unsafe_allow_html=True)
 
 reloaded = False
 with col2:
@@ -150,13 +141,6 @@ with col1:
     else:
         st.markdown(st.session_state["weekly_dates_html"], unsafe_allow_html=True)
 
-if st.session_state["weekly_lineplot_title"] is None:
-    fig_title = generate_week_lineplot_title(color_list)
-    st.session_state["weekly_lineplot_title"] = get_svg_html(fig_title)
-    plt.close(fig_title)
-
-st.write(st.session_state["weekly_lineplot_title"], unsafe_allow_html=True)
-
 plot_placeholder = st.empty()
 
 plot_placeholder.markdown(
@@ -169,12 +153,12 @@ plot_placeholder.markdown(
     }
     .loading-skeleton {
         width: 100%;
-        height: 361.5px; /* Adjust this to match your plot's relative height */
+        height: 378px; /* Adjust this to match your plot's relative height */
         background-color: #FAF9F6; /* Your warm gray secondary background */
         border: 2px dashed #B7B1A1;
         border-radius: 8px;
         margin-bottom: 8.5px;
-        margin-top: 4px;
+        margin-top: 0px;
         display: flex;
         justify-content: center;
         align-items: center;
@@ -206,14 +190,14 @@ elif  st.session_state["weekly_lineplot_html"] is not None:
 # for m in list_records:
 #     st.write(f"{m}: {' | '.join(map(str, st.session_state[m]))}")
 
-
+st.space(3)
 col1, col2, col3, col4 = st.columns([1.5, 5.5, 1.5, 2], vertical_alignment="center")
 
 with col1:
     if not st.session_state["finalized"]:
         st.markdown("**Select the stocks in order:**")
     else:
-        st.write("🔒 **Submission Locked**")
+        st.markdown("<span style='color: #C8C8C7; font-weight: bold;'>Select the stocks in order:</span>", unsafe_allow_html=True)
 with col2:
     if not st.session_state["finalized"]:
         sub_col1, sub_col2, sub_col3, sub_col4, sub_col5, sub_col6 = st.columns(
@@ -309,8 +293,8 @@ if st.session_state["finalized"]:
         st.markdown(final_html, unsafe_allow_html=True)
 
     
-    
-    st.subheader("P 1.2 - Complete Stock Data", anchor= False)
+    st.space(10)
+    st.subheader("P1.2 — Complete Stock Data", anchor= False)
     st.write("Add text based on wether the guess was correct + mention to scroll up")
     if st.session_state["final_lineplot_html"] is None:
         plot_placeholder_2 = st.empty()
@@ -353,15 +337,29 @@ if st.session_state["finalized"]:
         plot_placeholder_2.write(st.session_state["final_lineplot_html"], unsafe_allow_html=True)
         plt.close(fig)
         
+        st.space(10)
         with st.spinner("Check out the lineplot ..."):
             time.sleep(10)
 
     else:
         st.write(st.session_state["final_lineplot_html"], unsafe_allow_html=True)
     
-
-    st.header("P 2 - MoM Industry Heatmap", anchor= False)
+    st.space(20)
+    st.header("P2 — MoM Industry Heatmap", anchor= False)
     st.write("Add text")
+
+    years = ["2019", "2020", "2021", "2022", "2023", "2024", "2025"]
+    col1, col2, col3, col4, col5, col6, col7, _ = st.columns([1, 1, 1, 1, 1, 1, 1, 0.5], vertical_alignment="center")
+    lpad_list = ["13.6%", "4.58%", "9.5%", "14%", "18%", "21.35%", "25.75%"]
+    linelen_list = ["195px", "220px", "220px", "220px", "220px", "220px", "218px"]
+
+    for text, col, lpad, linelen in zip(years, [col1, col2, col3, col4, col5, col6, col7], lpad_list, linelen_list):
+        text_html = get_aligned_text_row(text, alignments="left", 
+                                         left_padding= lpad, right_padding= "0%", font_size= "16", 
+                                         margin_bottom= "0", line_thickness= "2px", line_width= linelen)
+        with col:
+            st.write(text_html, unsafe_allow_html= True)
+
     if st.session_state["heatmap_html"] is None:
         plot_placeholder_3 = st.empty()
         
@@ -375,7 +373,7 @@ if st.session_state["finalized"]:
             }
             .loading-skeleton {
                 width: 100%;
-                height: 500px; /* Matched to the scrollable container height */
+                height: 700px; /* Matched to the scrollable container height */
                 background-color: #FAF9F6; 
                 border: 2px dashed #B7B1A1;
                 border-radius: 8px;
@@ -400,11 +398,78 @@ if st.session_state["finalized"]:
         df_mom = heatmap_load_data()
         fig = generate_heatmap(df_mom)
         
-        st.session_state["heatmap_html"] = get_scrollable_svg_html(fig)
+        st.session_state["heatmap_html"] = get_open_scrollable_svg_html(fig, 700)
         plot_placeholder_3.write(st.session_state["heatmap_html"], unsafe_allow_html=True)
         plt.close(fig)
+
+        st.space(10)
+        with st.spinner("Check out the heatmap ..."):
+            time.sleep(10)
     
     else:
         st.write(st.session_state["heatmap_html"], unsafe_allow_html=True)
     
+    st.space(20)
+    st.header("P3 — Quarterly Sector Evolution", anchor= False)
+    st.write("Add text")
+
+    button_text = "Show change from 2019" if not st.session_state['barplots_idx'] else "Hide change from 2019"
+    if st.button(button_text):
+        st.session_state['barplots_idx'] = 1 - st.session_state['barplots_idx']
+        st.rerun()
+    
+    if st.session_state["barplots_html"] == []:
+        plot_placeholder_4 = st.empty()
+        
+        plot_placeholder_4.markdown(
+            """
+            <style>
+            @keyframes pulse {
+                0% { opacity: 0.6; }
+                50% { opacity: 1.0; }
+                100% { opacity: 0.6; }
+            }
+            .loading-skeleton {
+                width: 100%;
+                height: 550px; /* Matched to the scrollable container height */
+                background-color: #FAF9F6; 
+                border: 2px dashed #B7B1A1;
+                border-radius: 8px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                color: #B7B1A1;
+                font-family: sans-serif;
+                font-weight: bold;
+                animation: pulse 1.5s infinite ease-in-out;
+                margin-top: 20px;
+                margin-bottom: 20px;
+            }
+            </style>
+            <div class="loading-skeleton">
+                Generating visualization...
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+        df_bar, bline = barplot_load_data()
+        fig = generate_barplot(df_bar, bline, 0)
+        fig_2019 = generate_barplot(df_bar, bline, 1)
+        
+        st.session_state["barplots_html"].append(get_open_scrollable_svg_html(fig, 550, padding_leftright= "0", padding_topbottom= "0"))
+        st.session_state["barplots_html"].append(get_open_scrollable_svg_html(fig_2019, 550, padding_leftright= "0", padding_topbottom= "0"))
+        plot_placeholder_4.write(st.session_state["barplots_html"][0], unsafe_allow_html=True)
+        plt.close(fig)
+        plt.close(fig_2019)
+
+        st.space(10)
+        with st.spinner("Check out the barplot ..."):
+            time.sleep(10)
+    
+    else:
+        st.write(st.session_state["barplots_html"][st.session_state["barplots_idx"]], unsafe_allow_html=True)
+
+    
+
 

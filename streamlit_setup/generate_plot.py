@@ -494,25 +494,24 @@ def generate_heatmap(sector_mom):
     # ── x-axis (top) ─────────────────────────────────────────────────────────
     # step = 365
     # tick_pos = list(range(0, n_mo, step))
-    
-    # tick_pos = [0]
-    # x_labels = ['2019']
-    # last_month = '12'
-    # for i, val in enumerate(dates):
-    #         y, m, d = str(val).split('-')
-    #         if m == '01' and last_month == '12':
-    #             tick_pos.append(i)
-    #             x_labels.append(y)
+    if False:
+        tick_pos = [0]
+        x_labels = ['2019']
+        last_month = '12'
+        for i, val in enumerate(dates):
+                y, m, d = str(val).split('-')
+                if m == '01' and last_month == '12':
+                    tick_pos.append(i)
+                    x_labels.append(y)
 
-    #         # elif int(m) % 2 == 0 and int(last_month) % 2 == 1:
-    #         #     tick_pos.append(i)
-    #         #     x_labels.append(m)
-            
-    #         last_month = m
+                # elif int(m) % 2 == 0 and int(last_month) % 2 == 1:
+                #     tick_pos.append(i)
+                #     x_labels.append(m)
+                
+                last_month = m
 
-    # for t in tick_pos[1:]:
-    #      ax.vlines(x= t-10, ymin= -0.5, ymax= 30, colors= 'black', linewidth= 2)
-    #      ax.vlines(x= t, ymin= -0.5, ymax= 30, colors= 'black', linewidth= 2)
+        for t in tick_pos[1:]:
+            ax.vlines(x= t, ymin= -0.5, ymax= 30, colors= 'black', linewidth= 2)
     
     # ax.vlines(x= len(dates)-11, ymin= -0.5, ymax= 30, colors= 'black', linewidth= 2)
     # ax.set_xticks(tick_pos)
