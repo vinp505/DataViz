@@ -1,7 +1,125 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import base64
+import matplotlib.colors as mcolors
 from io import StringIO
+import regex as re
+import streamlit.components.v1 as components
+
+def get_open_scrollable_svg_html_inverted(fig, height=500):
+    """Saves a figure as SVG and wraps it in a scrollable container initialized at the bottom."""
+    imgdata = StringIO()
+    fig.savefig(imgdata, format="svg", bbox_inches="tight")
+    imgdata.seek(0)
+    svg_string = imgdata.getvalue()
+    
+    b64 = base64.b64encode(svg_string.encode('utf-8')).decode("utf-8")
+    
+    # By using flex-direction: column-reverse, the scrollbar starts at the bottom
+    html = f"""
+    <div style="
+        height: {height}px; 
+        overflow-y: auto; 
+        display: flex;
+        flex-direction: column-reverse;
+        border-left: 2px solid #000000;
+        border-radius: 8px;
+        background-color: #FAF9F6;
+    ">
+        <img src="data:image/svg+xml;base64,{b64}" style="width: 100%; height: auto; display: block;"/>
+    </div>
+
+    <div style="
+            position: absolute; 
+            left: -30px; 
+            top: 50%; 
+            transform: translateY(-50%); 
+            font-size: 24px; 
+            color: #000000; 
+            pointer-events: none; 
+            opacity: 1;
+            user-select: none;
+        ">
+            ↕
+        </div>
+    """
+    return html
+
+def get_interactive_svg_html(fig):
+    """Saves a Matplotlib figure as an SVG and wraps it with svg-pan-zoom.js inside an HTML document."""
+    # 1. Save figure to an in-memory text buffer
+    imgdata = StringIO()
+    fig.savefig(imgdata, format="svg", bbox_inches="tight")
+    imgdata.seek(0)
+    svg_string = imgdata.getvalue()
+    
+    # 2. Extract only the raw <svg>...</svg> XML tags (ignoring XML metadata)
+    svg_match = re.search(r'<svg.*</svg>', svg_string, re.DOTALL)
+    svg_clean = svg_match.group(0) if svg_match else svg_string
+
+    # 3. Inject an ID attribute so our JS library can select it, and set full scale
+    svg_clean = re.sub(
+        r'<svg', 
+        '<svg id="interactive-svg" style="width: 100%; height: 100%;"', 
+        svg_clean, 
+        count=1
+    )
+    
+    # 4. Build the complete HTML page with the svg-pan-zoom CDN script
+    html_content = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <!-- Load the lightweight panning/zooming library -->
+        <script src="https://cdn.jsdelivr.net/npm/svg-pan-zoom@3.6.1/dist/svg-pan-zoom.min.js"></script>
+        <style>
+            html, body {{
+                margin: 0;
+                padding: 0;
+                width: 100%;
+                height: 100%;
+                overflow: hidden;
+                background-color: #FAF9F6; /* Matches your warm background */
+            }}
+            #container {{
+                width: 100%;
+                height: 100%;
+                border: 2px solid #E1D6B6;
+                border-radius: 8px;
+                box-sizing: border-box;
+            }}
+        </style>
+    </head>
+    <body>
+        <div id="container">
+            {svg_clean}
+        </div>
+        <script>
+            window.onload = function() {{
+                // Initialize the pan-zoom behavior on our SVG
+                var panZoomInstance = svgPanZoom('#interactive-svg', {{
+                    zoomEnabled: true,
+                    controlIconsEnabled: true, // Shows subtle on-screen zoom overlay controls
+                    fit: true,
+                    center: true,
+                    minZoom: 0.1,
+                    maxZoom: 30,
+                    zoomScaleSensitivity: 0.2 // Controls scroll wheel sensitivity (soft zoom)
+                }});
+                
+                // Recalculate dimensions cleanly if the user resizes their browser
+                window.addEventListener('resize', function() {{
+                    panZoomInstance.resize();
+                    panZoomInstance.fit();
+                    panZoomInstance.center();
+                }});
+            }};
+        </script>
+    </body>
+    </html>
+    """
+    return html_content
 
 def get_svg_html(fig):
     """Saves a Matplotlib figure as an SVG string and returns it as a Base64 HTML tag."""
@@ -247,4 +365,120 @@ def generate_final_lineplot(df_list, color_list, name_list, x_ticks, x_labels):
                 ha='center',
                 va='top', weight= 550, size= size)
     
+    return fig
+
+
+def generate_heatmap(sector_mom):
+
+    n_sectors, n_mo = sector_mom.shape
+    dates = sector_mom.columns
+
+    finite = sector_mom.values[np.isfinite(sector_mom.values)]
+    vlim = round(float(np.percentile(np.abs(finite), 95)), 1) if len(finite) > 0 else 10.0
+
+    # ── layout ──────────────────────────────────────────────────────────────
+    cell_h   = 0.52
+    fig_w    = max(18, n_mo * 0.035 + 4)
+    fig_h    = max(7, n_sectors * cell_h + 3.6)   # +0.4 for extra header room
+    header_h = 1.5                                  # fixed inches — enough for any fig_h
+    footer_h = 0.45
+    T = 1.0 - header_h / fig_h
+    B = footer_h / fig_h
+
+    FACE = "#FAF9F6"
+    fig, ax = plt.subplots(figsize=(fig_w, fig_h), facecolor=FACE)
+    fig.subplots_adjust(top=T, bottom=B, left=0.18, right=0.985)
+    ax.set_facecolor(FACE)
+
+    # ── colormap (unchanged) ─────────────────────────────────────────────────
+    red, grey, green = '#D06A4C', FACE, '#4A9090'
+    cmap = mcolors.LinearSegmentedColormap.from_list('RdGrGn', [red, grey, green])
+
+    im = ax.imshow(
+        sector_mom.values,
+        aspect='auto', cmap=cmap,
+        vmin=-vlim, vmax=vlim,
+        interpolation='none',
+    )
+
+    # ── y-axis ───────────────────────────────────────────────────────────────
+    ax.set_yticks(range(n_sectors))
+    ax.set_yticklabels(sector_mom.index, fontsize=10, va='center',
+                       fontfamily='monospace')
+    ax.tick_params(axis='y', length=0, pad=6)
+
+    # ── x-axis (top) ─────────────────────────────────────────────────────────
+    # step = 365
+    # tick_pos = list(range(0, n_mo, step))
+    
+    tick_pos = [0]
+    x_labels = ['2019']
+    last_month = '12'
+    for i, val in enumerate(dates):
+            y, m, d = str(val).split('-')
+            if m == '01' and last_month == '12':
+                tick_pos.append(i)
+                x_labels.append(y)
+
+            # elif int(m) % 2 == 0 and int(last_month) % 2 == 1:
+            #     tick_pos.append(i)
+            #     x_labels.append(m)
+            
+            last_month = m
+    
+    ax.set_xticks(tick_pos)
+    ax.set_xticklabels(
+        x_labels,
+        fontsize=8, ha='center', rotation=0, color='#444444'
+    )
+    # ax.set_xticklabels(
+    #     [dates[i].strftime('%y') for i in tick_pos],
+    #     fontsize=8, ha='center', rotation=0, color='#444444'
+    # )
+    ax.xaxis.set_ticks_position('top')
+    ax.xaxis.set_label_position('top')
+    ax.tick_params(axis='x', length=0, pad=3)
+
+    # ── thin row separators ───────────────────────────────────────────────────
+    for i in range(1, n_sectors):
+        ax.axhline(i - 0.5, color=FACE, linewidth=1.2, zorder=3)
+
+    # ── spines off ───────────────────────────────────────────────────────────
+    for sp in ax.spines.values():
+        sp.set_visible(False)
+
+    # ── header (all elements expressed in absolute inches above T) ────────────
+    # yin converts inches-above-T → figure fraction (always > T, never touches heatmap)
+    #def yin(inches): return T + inches / fig_h
+
+    #L = 0.18   # left margin (matches subplots_adjust left)
+
+    # title: 1.2 in above T
+    # fig.text(L, yin(1.20), 'Sector Heatmap',
+    #          fontsize=16, fontweight='bold', va='bottom', ha='left', color='#1a1a1a')
+
+    # subtitle: 0.82 in above T
+    # date_range = f"{dates[0].strftime('%b %Y')} – {dates[-1].strftime('%b %Y')}"
+    # fig.text(L, yin(0.82), f'1-month % change in avg sector close price  ·  {date_range}',
+    #          fontsize=9, va='bottom', ha='left', color='#666666')
+
+    # colorbar: 0.55 in above T, anchored to the RIGHT side of the figure
+    # cbar_bottom = yin(0.55)
+    # cbar_h_frac = 0.20 / fig_h
+    # cbar_ax = fig.add_axes([0.63, cbar_bottom, 0.32, cbar_h_frac])
+    # cb = fig.colorbar(im, cax=cbar_ax, orientation='horizontal')
+    # cb.set_ticks([-vlim, 0, vlim])
+    # cb.set_ticklabels([f'−{vlim:.0f}%', '0', f'+{vlim:.0f}%'])
+    # cb.ax.tick_params(labelsize=7.5, length=0)
+    # cb.outline.set_visible(False)
+
+    # ── footer ───────────────────────────────────────────────────────────────
+    # fig.text(L, 0.008,
+    #          f'Source: InflAdj_Data_90th_2019_2025.csv  ·  {n_sectors} sectors  ·  30 trading-day rolling return',
+    #          fontsize=7.5, color='#aaaaaa', va='bottom', ha='left')
+
+    # out = save_path or 'heatmap_sector_averages.png'
+    # plt.savefig(out, dpi=150, bbox_inches='tight', facecolor=FACE)
+    # print(f'Saved → {out}')
+    #plt.show()
     return fig

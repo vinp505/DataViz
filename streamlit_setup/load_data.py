@@ -8,7 +8,7 @@ def lineplot_load_data():
     color_list = ['#0066cc', '#C41230', '#00AA4B', '#FFCF06']
     name_list = ['Apple', 'AGCO', 'Archer Daniels Midland', 'Advance Auto Parts']
 
-    for symbol in ['AAPL', 'ADM', 'AAP', 'AGCO']:
+    for symbol in ['AAPL', 'AGCO', 'ADM', 'AAP']:
         df = pd.read_csv(f"datasets/df_{symbol}.csv")
         df_list.append(df)
 
@@ -28,3 +28,7 @@ def lineplot_load_data():
             last_month = m
     
     return df_list, color_list, name_list, x_ticks, x_labels
+
+@st.cache_data
+def heatmap_load_data():
+    return pd.read_csv("datasets/sector_mom.csv", index_col= 'industry')
