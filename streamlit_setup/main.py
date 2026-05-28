@@ -110,22 +110,87 @@ if "final_order" not in st.session_state:
     st.session_state["final_order"] = []
 
 # overall title and introduction
-st.title("Zooming Out:How Time and Category Granularity can affect the perception of Stock Data", anchor= False)
-st.subheader("A Data Visualization Project by Bartosz Kochanski, Lukáš Trstenský, and Vincenzo Piras", anchor= False)
-st.write("Add introduction")
+# text formatted by Gemini
+st.markdown(
+    "<div style='text-align: center; font-size: 40px; font-weight: bold; font-family: sans-serif; color: black; margin-bottom: 10px;'>Zooming Out:</div>", 
+    unsafe_allow_html=True
+)
+st.markdown(
+    "<div style='text-align: center; font-size: 32px; font-weight: bold; font-family: sans-serif; color: black; margin-bottom: 25px;'>How Time and Category Granularity can affect the perception of Stock Data.</div>", 
+    unsafe_allow_html=True
+)
+st.markdown(
+    "<div style='text-align: center; font-size: 18px; font-weight: bold; font-family: sans-serif; color: black; margin-bottom: 15px;'>A Data Visualization Project by Bartosz Kochanski, Lukáš Trstenský, and Vincenzo Piras.</div>", 
+    unsafe_allow_html=True
+)
+st.space(5)
 
+# text formatted by Gemini
+st.markdown(
+    """
+    <p style="font-family: sans-serif; font-size: 16px; color: black; line-height: 1.5; margin: 0;">
+        Using 2025-inflation-adjusted historic stock market data spanning from the beginning of 2019 to the end of 2025, four visualization sections follow.<br/>
+        The components of this webpage represent the path from subjective, narrow-context, feelings to broader, objective realities, with the goal of bridging the mental gap between an individual trader looking at their personal portfolio performance and the overarching trends of the market.
+    </p>
+    """,
+    unsafe_allow_html=True
+)
+
+# text formatted by Gemini
+st.markdown(
+    """
+    <p style="font-family: sans-serif; font-size: 14px; color: #8C8C8C; line-height: 1.5; margin: 0;">
+        The page is meant to be viewed in the standard 16:9 ratio, and interactive elements such as buttons must not be pressed before the relative plot has loaded.
+    </p>
+    """,
+    unsafe_allow_html=True
+)
+
+# Gemini code - manually added data source link
+html_link = """
+<p style="font-family: sans-serif; font-size: 16px; color: black;">
+    📊 
+    <a href="https://huggingface.co/datasets/defeatbeta/yahoo-finance-data" target="_blank" style="color: #1E88E5; text-decoration: underline;">
+        data source
+    </a> 
+</p>
+"""
+st.markdown(html_link, unsafe_allow_html=True)
 
 # SECT1 - Individual Stocks // Snapshot and Complete Lineplot
 # -----------------------------------------------------------
 
 st.space(20)
-st.header("P1 — Individual Stocks", anchor= False)
-#st.write("Stocks are volatile, and putting your trust in a single title requires confidence.\nBelow are plots summarizing the performance of four selected stocks across a randomly selected 2-week period, together with a button to change the time window.\nFeel free to create as many snapshot as you need to take a responsible decision: order the plots in the drop down menu from what you think it's the most profitable stock to the most harmful. Once you are happy with your selection, click the button on the side to reveal the complete line plots for each of the stocks.")
-st.write("Add paragraph about: 1. concept 2. plot 3. game")
+st.header("P1 — Individual Stocks — value % change over time", anchor= False)
+
+# text formatted by Gemini
+st.markdown(
+    """
+    <p style="font-family: sans-serif; font-size: 16px; color: black; line-height: 1.5; margin: 0;">
+        With the use of multiple single-stock line charts, the section showcases the inherent difficulty in accurately assessing long-term performances when presented with short-term data.
+    </p>
+    """,
+    unsafe_allow_html=True
+)
 
 # SUBSECT - Lineplot Snapshot and Minigame
 st.space(10)
 st.subheader("P1.1 — Weekly Stock Data", anchor= False)
+
+# text formatted by Gemini
+st.markdown(
+    """
+    <p style="font-family: sans-serif; font-size: 16px; color: black; line-height: 1.5; margin: 0;">
+        Below there are four snapshot line plots, each encoding the 14-days relative performance of the associated stock: the first day of the time window serves as a baseline, and the percentage change from this initial value is reported on the y-axis.
+        The time frame is chosen at random, and is reported above the charts, together with a button to perform the date sampling, and subsequent plotting, again.
+        Based on the random snapshot plots, the goal is to assess the apparent reliability and profitability of each title over the long-term.
+        Submit the stocks ordered from worst to best, based on what their overall performance evolution from 2019 might have been, to reveal the complete line plot.
+    </p>
+    """,
+    unsafe_allow_html=True
+)
+
+st.space(3)
 
 # obtain data (cached), and various needed values
 df_list, color_list, name_list, x_ticks, x_labels = lineplot_load_data()
@@ -176,6 +241,7 @@ with col1:
     else:
         st.markdown(st.session_state["weekly_dates_html"], unsafe_allow_html=True)
 
+st.space(3)
 # placeholder for the lineplot snapshot, visible when the graph is loading (almost never :>)
 plot_placeholder = st.empty()
 plot_placeholder.markdown(
@@ -321,7 +387,6 @@ with col4:
 # only display other plots if the minigame is over
 if st.session_state["finalized"]:
 
-    
     col1, col2, col3, col4 = st.columns([1.5, 5.5, 1.5, 2], vertical_alignment="center")
 
     # plot correct order underneath the user's submission
@@ -362,8 +427,44 @@ if st.session_state["finalized"]:
     # SUBSECT - Complete Lineplot
     st.space(10)
     st.subheader("P1.2 — Complete Stock Data", anchor= False)
-    st.write("Add text based on wether the guess was correct + mention to scroll up")
+
+    if st.session_state['final_order'] == ['Stock 4', 'Stock 3', 'Stock 2', 'Stock 1']:
+        
+        # text formatted by Gemini
+        st.markdown(
+            """
+            <p style="font-family: sans-serif; font-size: 16px; color: black; line-height: 1.5; margin: 0;">
+                Congratulations, you correctly identified best and worst performing stocks over the long-term.
+            </p>
+            """,
+            unsafe_allow_html=True
+        )
     
+    else:
+
+        # text formatted by Gemini
+        st.markdown(
+            """
+            <p style="font-family: sans-serif; font-size: 16px; color: black; line-height: 1.5; margin: 0;">
+                The stocks were not ordered correctly, but good effort trying to read through the chaotic snapshots.
+            </p>
+            """,
+            unsafe_allow_html=True
+        )
+    
+    # text formatted by Gemini
+    st.markdown(
+            """
+            <p style="font-family: sans-serif; font-size: 16px; color: black; line-height: 1.5; margin: 0;">
+                What follows is the line plot containing the complete historic data for the four stocks.
+                It starts from the worst performing title, and it is possible to scroll upwards to observe the trends for the more successful companies.
+            </p>
+            """,
+            unsafe_allow_html=True
+        )
+    
+    st.space(3)
+
     # generate lineplot on first run
     if st.session_state["final_lineplot_html"] is None:
 
@@ -426,8 +527,28 @@ if st.session_state["finalized"]:
 # -----------------------------------------------------------
 
     st.space(20)
-    st.header("P2 — MoM Industry Heatmap", anchor= False)
-    st.write("Add text")
+    st.header("P2 — Industry Heatmap — MoM average value % change across industries", anchor= False)
+    
+    # text formatted by Gemini
+    st.markdown(
+        """
+        <p style="font-family: sans-serif; font-size: 16px; color: black; line-height: 1.5; margin: 0;">
+            The following heatmap highlights the Month-over-Month (MoM) waves of gains and losses across industries, presenting the slightly broader context effecting individual stocks.<br/>
+            MoM values encode the percentage change in stock value compared to 30 days prior: a positive value means the title price went up, compared to the past month.
+        </p>
+        """,
+        unsafe_allow_html=True
+    )
+
+    # text formatted by Gemini
+    st.markdown(
+        """
+        <p style="font-family: sans-serif; font-size: 14px; color: #8C8C8C; line-height: 1.5; margin: 0;">
+            Titles below the 20th percentile value for industry-specific average trading volume (amount of stocks traded) and 2019 starting stock price were discarded.
+        </p>
+        """,
+        unsafe_allow_html=True
+    )
 
 
     # x axis labels, manually aligned with the plot
@@ -518,8 +639,33 @@ if st.session_state["finalized"]:
 # -----------------------------------------------------------
 
     st.space(20)
-    st.header("P3 — Quarterly Sector Evolution", anchor= False)
-    st.write("Add text")
+    st.header("P3 — Sector Evolution — quarterly average value % change across sectors", anchor= False)
+    
+    # text formatted by Gemini
+    st.markdown(
+        """
+        <p style="font-family: sans-serif; font-size: 16px; color: black; line-height: 1.5; margin: 0;">
+            The presented barplot presents quarterly sector performance, now showing broader market trends.<br/>
+            Negative quarters likely indicate systematic regression in price, rather than a temporary independent negative moment for specific industries or stocks, adding more context to long-term performance analysis.<br/>
+            Each bar represents the change, in percentage, of the mean price across all sector-specific stocks from the last day of the previous quarter to the last day of the current quarter: positive values indicate that the average company is worth more at the end of the given quarter than it was at the end of the previous.<br/>
+            After observing the graph, it is possible to add the sector-specific mean price percentage change from the beginning of 2019 for each quarter by clicking the button.<br/>
+            It is then possible to compare the perceived overall health and profitability of a sector on a quarterly basis with its long-term trends: are 3-month periods enough to determine the extended reliability of a sector?
+        </p>
+        """,
+        unsafe_allow_html=True
+    )
+
+    # text generated by Gemini
+    st.markdown(
+        """
+        <p style="font-family: sans-serif; font-size: 14px; color: #8C8C8C; line-height: 1.5; margin: 0;">
+            Titles below the 20th percentile value for sector-specific average trading volume (amount of stocks traded) and 2019 starting stock price were discarded.
+        </p>
+        """,
+        unsafe_allow_html=True
+    )
+    
+    st.space(3)
 
     # button to control wether to show change from 2019 on the plot, initial state is 'not displayed'
     col1, _ = st.columns([3, 7], vertical_alignment="center")
@@ -531,6 +677,8 @@ if st.session_state["finalized"]:
             st.session_state['barplots_idx'] = 1 - st.session_state['barplots_idx']
             st.rerun()
     
+    st.space(1)
+
     # if no code for the barplots is cached, create both versions (with and without 2019 change)
     if st.session_state["barplots_html"] == []:
         
@@ -593,6 +741,55 @@ if st.session_state["finalized"]:
     else:
         st.write(st.session_state["barplots_html"][st.session_state["barplots_idx"]], unsafe_allow_html=True)
 
+# -----------------------------------------------------------
+
+# SECT4 - 2019-2025 Market Evolution // Animated Spiral
+# -----------------------------------------------------------
+
+    st.space(20)
+    st.header("P4 — 2019-2025 Market Evolution — overall average value % change animated spiral", anchor= False)
     
+    # text formatted by Gemini
+    st.markdown(
+        """
+        <p style="font-family: sans-serif; font-size: 16px; color: black; line-height: 1.5; margin: 0;">
+            The spiral facilitates the comparison of daily aggregate stock trends and performance across years using a continuous line, allowing for animation.<br/>
+            It shows the highs and lows of trading both inside individual years, and over multiple years.
+            This provides full long-term context about the gains or losses of sectors and industries in any period of time, while also serving as a point of comparison between the performance of one’s own portfolio and the average market performance.
+        </p>
+        """,
+        unsafe_allow_html=True
+    )
 
+    # text formatted by Gemini
+    st.markdown(
+        """
+        <p style="font-family: sans-serif; font-size: 14px; color: #8C8C8C; line-height: 1.5; margin: 0;">
+            Titles below the 20th percentile value for global average trading volume (amount of stocks traded) and 2019 starting stock price were discarded.
+        </p>
+        """,
+        unsafe_allow_html=True
+    )
 
+    st.space(3)
+
+    col1, col2, col3 = st.columns([2, 5, 2], vertical_alignment="center")
+    
+    with col2:
+        st.video(
+            "spiral-vol20-price20.mp4",
+            autoplay=True,
+            loop=True,
+            muted=True,
+            start_time=0
+        )
+
+    st.space(30)
+    st.markdown(
+        """
+        <p style='text-align: center; color: #BF8755; font-size: 15px; font-weight: bold; font-family: sans-serif; margin-top: 30px; margin-bottom: 30px;'>
+            Thanks for reading.
+        </p>
+        """, 
+        unsafe_allow_html=True
+    )
