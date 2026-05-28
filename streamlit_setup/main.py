@@ -33,10 +33,15 @@ st.markdown("""
         transition: background-color 0.5s ease, border-color 0.5s ease !important;
     }
     
-    div[data-testid="stHorizontalBlock"] {
+    .stApp {
+        background-color: #FAF9F6 !important;
+    }
+
+    div[data-testid="stMainBlockContainer"], .block-container {
         max-width: 1600px !important;
         margin-left: auto !important;
         margin-right: auto !important;
+        padding-top: 50px !important;
     }
             
     .stApp, .stApp *:not(input):not(textarea) {
