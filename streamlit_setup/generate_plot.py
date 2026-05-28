@@ -245,6 +245,8 @@ def generate_heatmap(sector_mom):
     # ── colormap (unchanged) ─────────────────────────────────────────────────
     red, grey, green = '#D06A4C', FACE, '#4C98CE'
     cmap = mcolors.LinearSegmentedColormap.from_list('RdGrGn', [red, grey, green])
+    norm = mcolors.Normalize(vmin=-vlim, vmax=vlim)
+
 
     im = ax.imshow(
         sector_mom.values,
@@ -285,7 +287,23 @@ def generate_heatmap(sector_mom):
     for sp in ax.spines.values():
         sp.set_visible(False)
 
-    return fig
+    #colorbar
+    colorbar, ax = plt.subplots(figsize=0.35, facecolor=FACE)
+    colorbar.subplots_adjust(left=0, right=1, top=1, bottom=0)
+
+    cb = colorbar.colorbar(
+        plt.cm.ScalarMappable(norm=norm, cmap=cmap),
+        cax=ax,
+        orientation='horizontal',
+    )
+    cb.set_ticks([])
+    cb.outline.set_visible(False)
+    cb.ax.text(0, 0.5, f'{-vlim:.1f}% ', transform=cb.ax.transAxes,
+               ha='right', va='center', fontsize=9, fontweight='bold')
+    cb.ax.text(1, 0.5, f' {vlim:.1f}%', transform=cb.ax.transAxes,
+               ha='left', va='center', fontsize=9, fontweight='bold')
+
+    return [fig, colorbar]
 
 # -------------------------------------------------------------------------------
 
