@@ -1,33 +1,43 @@
+"""
+Main script to render and effectively run the webpage.
+"""
+
+# -------------------------------------------------------------------------------
+
 import streamlit as st
 import numpy as np
 import matplotlib.pyplot as plt
-import streamlit.components.v1 as components
 import time
 
 from load_data import lineplot_load_data, heatmap_load_data, barplot_load_data
-from generate_plot import get_aligned_text_row, generate_week_lineplot, generate_final_lineplot, get_svg_html, generate_week_lineplot_title, get_scrollable_svg_html_inverted, generate_heatmap, get_scrollable_svg_html, get_interactive_svg_html, get_open_scrollable_svg_html_inverted, get_open_scrollable_svg_html, generate_barplot
+from generate_plot import generate_week_lineplot, generate_final_lineplot, generate_heatmap, generate_barplot
+from html_functions import get_aligned_text_row, get_svg_html, get_open_scrollable_svg_html_inverted, get_open_scrollable_svg_html
+
+# -------------------------------------------------------------------------------
 
 st.set_page_config(layout="wide")
 
+# !! Gemini code skeleton - parameters manually set
+# -----------------------
 st.markdown("""
     <style>
     div[data-testid="stButton"] button {
-        background-color: #BF8755 !important; /* Button background color */
-        color: #FAF9F6 !important;               /* Text color inside the box */
-        border: 2px solid #BF8755 !important;  /* Optional: Border color */
-        border-radius: 6px !important;         /* Corner roundness */
+        background-color: #BF8755 !important;
+        color: #FAF9F6 !important;
+        border: 2px solid #BF8755 !important;
+        border-radius: 6px !important;
         font-weight: bold !important;
         transition: background-color 0.5s ease, border-color 0.5s ease !important;
     }
     
-    /* 2. Style when Hovering over the Button Box */
+    /* Button Hover */
     div[data-testid="stButton"] button:hover {
-        background-color: #D38949 !important; /* Hover background color (Red) */
-        border-color: #D38949 !important;     /* Hover border color */
+        background-color: #D38949 !important;
+        border-color: #D38949 !important;
         color: #FAF9F6 !important;
     }
             
-    /* Ensure the disabled state looks clean */
+    /* Button Disabled */
     div[data-testid="stButton"] button:disabled {
         color: #FAF9F6 !important;
         background-color: #E6DCD2 !important;
@@ -36,21 +46,18 @@ st.markdown("""
     }
 
     .stSelectbox div[data-baseweb="select"] > div:first-child {
-        border-color: #BF8755 !important; /* Your custom border color (e.g. Teal) */
+        border-color: #BF8755 !important;
     }
 
-    /* 2. Border color on Hover */
     .stSelectbox div[data-baseweb="select"]:hover > div:first-child {
-        border-color: #D38949 !important; /* Hover border color (e.g. Red) */
+        border-color: #D38949 !important;
     }
 
-    /* 3. Border color when Focused (Clicked / Dropdown is open) */
     .stSelectbox div[data-baseweb="select"] > div:focus-within {
         border-color: #D38949 !important;
-        box-shadow: 0 0 0 1px #D38949 !important; /* Optional: Highlights the border halo */
+        box-shadow: 0 0 0 1px #D38949 !important;
     }
-                 
-    /* Force elements to maintain 100% opacity during a rerun */
+
     div[data-stale="true"] {
         opacity: 1.0 !important;
         filter: none !important;
@@ -58,55 +65,63 @@ st.markdown("""
             
     </style>
 """, unsafe_allow_html=True)
+# -----------------------
 
+
+# initialize various session state parameters
+
+# plot caching
 if "final_lineplot_html" not in st.session_state:
     st.session_state["final_lineplot_html"] = None
 if "weekly_lineplot_html" not in st.session_state:
     st.session_state["weekly_lineplot_html"] = None
-
-if "weekly_dates_html" not in st.session_state:
-    st.session_state["weekly_dates_html"] = None
 if "heatmap_html" not in st.session_state:
     st.session_state["heatmap_html"] = None
 if "barplots_html" not in st.session_state:
     st.session_state["barplots_html"] = []
+
+# helpers
+if "current_seed" not in st.session_state:  
+    st.session_state["current_seed"] = 42  # seed to extract random period for lineplot snapshot
+if "weekly_dates_html" not in st.session_state:
+    st.session_state["weekly_dates_html"] = None  # store date range of random extracted lineplot period
 if "barplots_idx" not in st.session_state:
-    st.session_state["barplots_idx"] = 0
+    st.session_state["barplots_idx"] = 0  # id of barplot to display (with / without change from 2019)
 
+# not really needed - count how many times the lineplot snapshot has been re-generated
 if "weekly_plot_counter" not in st.session_state:
-    st.session_state["weekly_plot_counter"] = 0
+    st.session_state["weekly_plot_counter"] = 0  
 
-if "current_seed" not in st.session_state:
-    st.session_state["current_seed"] = 42
-
+# status tracking for the initial 'minigame'
 if "finalized" not in st.session_state:
     st.session_state["finalized"] = False
 if "final_order" not in st.session_state:
     st.session_state["final_order"] = []
 
-# list_records = ["max_peak_history", "min_peak_history", "max_final_history", "min_final_history"]
-
-# for m in list_records:
-#     if m not in st.session_state:
-#         st.session_state[m] = [0] * 4
-
-
+# overall title and introduction
 st.title("Zooming Out: How Time and Category Granularity can affect the perception of Stock Data", anchor= False)
 st.subheader("A Data Visualization Project by ...", anchor= False)
 st.write("Add introduction")
+
+
+# SECT1 - Individual Stocks // Snapshot and Complete Lineplot
+# -----------------------------------------------------------
 
 st.space(20)
 st.header("P1 — Individual Stocks", anchor= False)
 #st.write("Stocks are volatile, and putting your trust in a single title requires confidence.\nBelow are plots summarizing the performance of four selected stocks across a randomly selected 2-week period, together with a button to change the time window.\nFeel free to create as many snapshot as you need to take a responsible decision: order the plots in the drop down menu from what you think it's the most profitable stock to the most harmful. Once you are happy with your selection, click the button on the side to reveal the complete line plots for each of the stocks.")
 st.write("Add paragraph about: 1. concept 2. plot 3. game")
 
+# SUBSECT - Lineplot Snapshot and Minigame
 st.space(10)
 st.subheader("P1.1 — Weekly Stock Data", anchor= False)
 
+# obtain data (cached), and various needed values
 df_list, color_list, name_list, x_ticks, x_labels = lineplot_load_data()
-
+ 
 col1, col2, col3 = st.columns([3, 2, 7], vertical_alignment="center")
 
+# plot and align titles for subplots
 text_list = ['Stock 1', 'Stock 2', 'Stock 3', 'Stock 4']
 cols = st.columns([1, 1, 1, 1], vertical_alignment= "center")
 for text, col, lpad in zip(text_list, cols, ["38.5%", "41%", "44%", "47%"]):
@@ -114,20 +129,25 @@ for text, col, lpad in zip(text_list, cols, ["38.5%", "41%", "44%", "47%"]):
         text_html = get_aligned_text_row(text, alignments= 'left', left_padding= lpad, font_size= "19", margin_bottom= "0")
         st.markdown(text_html, unsafe_allow_html=True)
 
+# re-generate plot if button is clicked or if wepage has just been started
 reloaded = False
 with col2:
     if st.button("Re-Generate Snapshot Plots") or st.session_state['weekly_plot_counter'] == 0:
+        
+        # update parameters
         reloaded= True
         st.session_state["current_seed"] = np.random.randint(14, 1759)
-        
         st.session_state["weekly_plot_counter"] += 1
 
+        # plot graph (fig, date_beginning, date_end are needed, remaining variables' use was discarded)
         fig, stock_min_final, stock_max_final, stock_min_peak, stock_max_peak, date_beginning, date_end = generate_week_lineplot(df_list, color_list, st.session_state["current_seed"])
 
-
-
+# plot date range, update when needed
 with col1:
     if st.session_state["weekly_dates_html"] == None or reloaded:
+
+        # !! HTML generated by Gemini
+        # ---------------------------
         date_range = f"<span style='color: #000000; font-weight: bold;'>{date_beginning} → {date_end}</span>"
         final_html = f"""
             <p style='text-align: center; font-size: 16px; margin: 0; position: relative; top: -8px'>
@@ -135,15 +155,21 @@ with col1:
                 {date_range}
             </p>
             """
+        # ---------------------------
+
+        # store current date range, and display it
         st.session_state["weekly_dates_html"] = final_html
         st.markdown(st.session_state["weekly_dates_html"], unsafe_allow_html=True)
     
+    # display cached dates if the plot wasn't updated
     else:
         st.markdown(st.session_state["weekly_dates_html"], unsafe_allow_html=True)
 
+# placeholder for the lineplot snapshot, visible when the graph is loading (almost never :>)
 plot_placeholder = st.empty()
-
 plot_placeholder.markdown(
+    # !! Gemini code skeleton - parameters manually set
+    # -----------------------
     """
     <style>
     @keyframes pulse {
@@ -153,16 +179,16 @@ plot_placeholder.markdown(
     }
     .loading-skeleton {
         width: 100%;
-        height: 378px; /* Adjust this to match your plot's relative height */
-        background-color: #FAF9F6; /* Your warm gray secondary background */
-        border: 2px dashed #B7B1A1;
+        height: 378px;
+        background-color: #FAF9F6;
+        border: 2px dashed #BF8755;
         border-radius: 8px;
         margin-bottom: 8.5px;
         margin-top: 0px;
         display: flex;
         justify-content: center;
         align-items: center;
-        color: #B7B1A1;
+        color: #BF8755;
         font-family: sans-serif;
         font-weight: bold;
         animation: pulse 1.5s infinite ease-in-out;
@@ -173,8 +199,10 @@ plot_placeholder.markdown(
     </div>
     """,
     unsafe_allow_html=True
+    # -----------------------
 )
 
+# plot linechart snapshot in the placeholder skeleton - newly generated, or cached
 if reloaded:
     st.session_state["weekly_lineplot_html"] = get_svg_html(fig)
     plot_placeholder.write(st.session_state["weekly_lineplot_html"], unsafe_allow_html=True)
@@ -183,29 +211,34 @@ if reloaded:
 elif  st.session_state["weekly_lineplot_html"] is not None:
     plot_placeholder.write(st.session_state["weekly_lineplot_html"], unsafe_allow_html=True)
 
-# st.subheader("Accumulated Stats")
-# st.write(f"Total Plots Generated: {st.session_state['plot_counter']}")
-# st.write("stock 1 | stock 2 | stock 3 | stock 4")
 
-# for m in list_records:
-#     st.write(f"{m}: {' | '.join(map(str, st.session_state[m]))}")
+# 'minigame' section
 
 st.space(3)
 col1, col2, col3, col4 = st.columns([1.5, 5.5, 1.5, 2], vertical_alignment="center")
 
+# info text: black if user hasn't submitted an order, gray otherwise
 with col1:
     if not st.session_state["finalized"]:
         st.markdown("**Select the stocks in order:**")
     else:
+        # !! Gemini code
         st.markdown("<span style='color: #C8C8C7; font-weight: bold;'>Select the stocks in order:</span>", unsafe_allow_html=True)
+
+# input / display user selection
 with col2:
+
+    # minigame still on: plot clickable fields
     if not st.session_state["finalized"]:
+
         sub_col1, sub_col2, sub_col3, sub_col4, sub_col5, sub_col6 = st.columns(
             [0.5, 1, 1, 1, 1, 0.5], 
             vertical_alignment="center"
         )
         stock_options = ['Stock 1', 'Stock 2', 'Stock 3', 'Stock 4']
         
+        # !! Gemini code skeleton - parameters manually set
+        # -----------------------
         with sub_col1:
             st.markdown("<p style='text-align: right; font-weight: bold; margin: 0; position: relative; top: -8px;'>Worst → </p>", unsafe_allow_html=True)
         with sub_col2:
@@ -218,9 +251,14 @@ with col2:
             choice4 = st.selectbox("4th", options=stock_options, label_visibility="collapsed", key="s4")
         with sub_col6:
             st.markdown("<p style='text-align: left; font-weight: bold; margin: 0; position: relative; top: -8px;'> → Best</p>", unsafe_allow_html=True)
-
+        # -----------------------
         user_order = [choice1, choice2, choice3, choice4]
+    
+    # minigame over: display user's submitted order
     else:
+
+        # !! HTML generated by Gemini
+        # ---------------------------
         formatted_stocks = [
             f"""<span style='
                 background-color: {color_list[int(stock[-1])-1]};
@@ -245,27 +283,39 @@ with col2:
             <span style='font-weight: bold; color: black;'> → Best</span>
         </p>
         """
-        
+        # ---------------------------
+
+        # display submission
         st.markdown(final_html, unsafe_allow_html=True)
         user_order = st.session_state["final_order"]
 
+# handle the button logic
 with col4:
     if st.button("Submit & Unlock Complete Plot", disabled=st.session_state["finalized"]):
+
+        # make sure only valid combinations are accepted
         if len(user_order) < 4:
             st.toast("Select all 4 stocks in the  \ndesired order before submitting.", icon="⚠️")
         elif len(set(user_order)) < 4:
             st.toast("Select each stock exactly  \nonce before submitting.", icon="⚠️")
         else:
+
+            # cache valid submission
             st.session_state["final_order"] = user_order
             st.session_state["finalized"] = True
             st.rerun()
 
+# only display other plots if the minigame is over
 if st.session_state["finalized"]:
 
+    
     col1, col2, col3, col4 = st.columns([1.5, 5.5, 1.5, 2], vertical_alignment="center")
 
+    # plot correct order underneath the user's submission
     with col2:
 
+        # !! HTML generated by Gemini
+        # ---------------------------
         formatted_stocks = [
             f"""<span style='
                 background-color: {color_list[int(stock[-1])-1]};
@@ -290,15 +340,21 @@ if st.session_state["finalized"]:
             <span style='font-weight: bold; color: black;'> → Best</span>
         </p>
         """   
+        # ---------------------------
+
         st.markdown(final_html, unsafe_allow_html=True)
 
-    
+    # SUBSECT - Complete Lineplot
     st.space(10)
     st.subheader("P1.2 — Complete Stock Data", anchor= False)
     st.write("Add text based on wether the guess was correct + mention to scroll up")
+    
+    # generate lineplot on first run
     if st.session_state["final_lineplot_html"] is None:
+
+        # !! Gemini code skeleton - parameters manually set
+        # -----------------------
         plot_placeholder_2 = st.empty()
-        
         plot_placeholder_2.markdown(
             """
             <style>
@@ -309,14 +365,14 @@ if st.session_state["finalized"]:
             }
             .loading-skeleton {
                 width: 100%;
-                height: 500px; /* Matched to the scrollable container height */
+                height: 450px;
                 background-color: #FAF9F6; 
-                border: 2px dashed #B7B1A1;
+                border: 2px dashed #BF8755;
                 border-radius: 8px;
                 display: flex;
                 justify-content: center;
                 align-items: center;
-                color: #B7B1A1;
+                color: #BF8755;
                 font-family: sans-serif;
                 font-weight: bold;
                 animation: pulse 1.5s infinite ease-in-out;
@@ -330,23 +386,36 @@ if st.session_state["finalized"]:
             """,
             unsafe_allow_html=True
         )
+        # -----------------------
 
+        # generate lineplot
         fig = generate_final_lineplot(df_list, color_list, name_list, x_ticks, x_labels)
         
+        # store the html code for the plot in the parameters, display it on the placeholder
         st.session_state["final_lineplot_html"] = get_open_scrollable_svg_html_inverted(fig, height= 450)
         plot_placeholder_2.write(st.session_state["final_lineplot_html"], unsafe_allow_html=True)
         plt.close(fig)
         
+        # wait before loading other plots (mindfulness!)
         st.space(10)
         with st.spinner("Check out the lineplot ..."):
             time.sleep(10)
 
+    # if the plot was already generated, display the cached code
     else:
         st.write(st.session_state["final_lineplot_html"], unsafe_allow_html=True)
-    
+
+# -----------------------------------------------------------
+
+# SECT2 - MoM Industry Evolution // Heatmap
+# -----------------------------------------------------------
+
     st.space(20)
     st.header("P2 — MoM Industry Heatmap", anchor= False)
     st.write("Add text")
+
+
+    # x axis labels, manually aligned with the plot
 
     years = ["2019", "2020", "2021", "2022", "2023", "2024", "2025"]
     col1, col2, col3, col4, col5, col6, col7, _ = st.columns([1, 1, 1, 1, 1, 1, 1, 0.5], vertical_alignment="center")
@@ -360,9 +429,12 @@ if st.session_state["finalized"]:
         with col:
             st.write(text_html, unsafe_allow_html= True)
 
+    # on the first run, generate the heatmap
     if st.session_state["heatmap_html"] is None:
-        plot_placeholder_3 = st.empty()
         
+        # !! Gemini code skeleton - parameters manually set
+        # -----------------------
+        plot_placeholder_3 = st.empty()
         plot_placeholder_3.markdown(
             """
             <style>
@@ -373,14 +445,14 @@ if st.session_state["finalized"]:
             }
             .loading-skeleton {
                 width: 100%;
-                height: 700px; /* Matched to the scrollable container height */
+                height: 700px;
                 background-color: #FAF9F6; 
-                border: 2px dashed #B7B1A1;
+                border: 2px dashed #BF8755;
                 border-radius: 8px;
                 display: flex;
                 justify-content: center;
                 align-items: center;
-                color: #B7B1A1;
+                color: #BF8755;
                 font-family: sans-serif;
                 font-weight: bold;
                 animation: pulse 1.5s infinite ease-in-out;
@@ -394,33 +466,49 @@ if st.session_state["finalized"]:
             """,
             unsafe_allow_html=True
         )
+        # -----------------------
 
+        # load data (cached), generate plot
         df_mom = heatmap_load_data()
         fig = generate_heatmap(df_mom)
         
+        # store the html code for the plot in the parameters, display it on the placeholder
         st.session_state["heatmap_html"] = get_open_scrollable_svg_html(fig, 700)
         plot_placeholder_3.write(st.session_state["heatmap_html"], unsafe_allow_html=True)
         plt.close(fig)
 
+        # mindfulness blabla
         st.space(10)
         with st.spinner("Check out the heatmap ..."):
             time.sleep(10)
     
+    # if the plot was already generated, display the cached code
     else:
         st.write(st.session_state["heatmap_html"], unsafe_allow_html=True)
-    
+
+# -----------------------------------------------------------
+
+# SECT3 -  Quarterly Sector Evolution // Barplot
+# -----------------------------------------------------------
+
     st.space(20)
     st.header("P3 — Quarterly Sector Evolution", anchor= False)
     st.write("Add text")
 
+    # button to control wether to show change from 2019 on the plot, initial state is 'not displayed'
     button_text = "Show change from 2019" if not st.session_state['barplots_idx'] else "Hide change from 2019"
     if st.button(button_text):
+
+        # flip the barplot idx (0 to 1 / 1 to 0)
         st.session_state['barplots_idx'] = 1 - st.session_state['barplots_idx']
         st.rerun()
     
+    # if no code for the barplots is cached, create both versions (with and without 2019 change)
     if st.session_state["barplots_html"] == []:
-        plot_placeholder_4 = st.empty()
         
+        # !! Gemini code skeleton - parameters manually set
+        # -----------------------
+        plot_placeholder_4 = st.empty()
         plot_placeholder_4.markdown(
             """
             <style>
@@ -433,12 +521,12 @@ if st.session_state["finalized"]:
                 width: 100%;
                 height: 550px; /* Matched to the scrollable container height */
                 background-color: #FAF9F6; 
-                border: 2px dashed #B7B1A1;
+                border: 2px dashed #BF8755;
                 border-radius: 8px;
                 display: flex;
                 justify-content: center;
                 align-items: center;
-                color: #B7B1A1;
+                color: #BF8755;
                 font-family: sans-serif;
                 font-weight: bold;
                 animation: pulse 1.5s infinite ease-in-out;
@@ -452,21 +540,28 @@ if st.session_state["finalized"]:
             """,
             unsafe_allow_html=True
         )
+        # -----------------------
 
+        # load data (cached), generate the two barplots
         df_bar, bline = barplot_load_data()
         fig = generate_barplot(df_bar, bline, 0)
         fig_2019 = generate_barplot(df_bar, bline, 1)
         
+        # store them in the parameter (list), idx 0 stores plot not showing change from 2019, idx 1 stores the other
         st.session_state["barplots_html"].append(get_open_scrollable_svg_html(fig, 550, padding_leftright= "0", padding_topbottom= "0"))
         st.session_state["barplots_html"].append(get_open_scrollable_svg_html(fig_2019, 550, padding_leftright= "0", padding_topbottom= "0"))
+        
+        # plot figure 0 in the placeholder
         plot_placeholder_4.write(st.session_state["barplots_html"][0], unsafe_allow_html=True)
         plt.close(fig)
         plt.close(fig_2019)
 
+        # lochness
         st.space(10)
         with st.spinner("Check out the barplot ..."):
             time.sleep(10)
     
+    # if already cached, display the plot corresponding to the current idx
     else:
         st.write(st.session_state["barplots_html"][st.session_state["barplots_idx"]], unsafe_allow_html=True)
 
