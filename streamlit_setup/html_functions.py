@@ -86,18 +86,25 @@ def get_open_scrollable_svg_html(fig, height=500, padding_topbottom= "10", paddi
 
     html = f"""
     <div style="
-        height: {height}px; 
-        overflow-y: auto;
-        border-left: 3.5px solid #000000;
-        border-radius: 8px;
-        background-color: #FAF9F6;
-        padding: {padding_topbottom}px {padding_leftright}px;
-        box-sizing: border-box;
+        position: relative; 
+        width: 100%; 
+        max-width: 1200px; 
+        margin: 30px auto;
     ">
-        <img src="data:image/svg+xml;base64,{b64}" style="width: 100%; height: auto; display: block; border-radius: {border_radius}px;"/>
-    </div>
+        
+        <div style="
+            height: {height}px; 
+            overflow-y: auto;
+            border-left: 3.5px solid #000000;
+            border-radius: 8px;
+            background-color: #FAF9F6;
+            padding: {padding_topbottom}px {padding_leftright}px;
+            box-sizing: border-box;
+        ">
+            <img src="data:image/svg+xml;base64,{b64}" style="width: 100%; height: auto; display: block; border-radius: {border_radius}px;"/>
+        </div>
 
-    <div style="
+        <div style="
             position: absolute; 
             left: -30px; 
             top: 50%; 
@@ -110,6 +117,8 @@ def get_open_scrollable_svg_html(fig, height=500, padding_topbottom= "10", paddi
         ">
             ⬍
         </div>
+        
+    </div>
     """
     # --------------
 
@@ -133,18 +142,25 @@ def get_open_scrollable_svg_html_inverted(fig, height=500):
     # By using flex-direction: column-reverse, the scrollbar starts at the bottom
     html = f"""
     <div style="
-        height: {height}px; 
-        overflow-y: auto; 
-        display: flex;
-        flex-direction: column-reverse;
-        border-left: 3.5px solid #000000;
-        border-radius: 8px;
-        background-color: #FAF9F6;
+        position: relative; 
+        width: 100%; 
+        max-width: 1200px; 
+        margin: 30px auto;
     ">
-        <img src="data:image/svg+xml;base64,{b64}" style="width: 100%; height: auto; display: block; border-radius: 8px;"/>
-    </div>
+        
+        <div style="
+            height: {height}px; 
+            overflow-y: auto; 
+            display: flex;
+            flex-direction: column-reverse;
+            border-left: 3.5px solid #000000;
+            border-radius: 8px;
+            background-color: #FAF9F6;
+        ">
+            <img src="data:image/svg+xml;base64,{b64}" style="width: 100%; height: auto; display: block; border-radius: 8px;"/>
+        </div>
 
-    <div style="
+        <div style="
             position: absolute; 
             left: -30px; 
             top: 50%; 
@@ -157,6 +173,8 @@ def get_open_scrollable_svg_html_inverted(fig, height=500):
         ">
             ⬍
         </div>
+        
+    </div>
     """
     # --------------
 
