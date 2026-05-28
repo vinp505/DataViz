@@ -410,7 +410,7 @@ def generate_barplot(df, avg_close, ticks_2019: bool = False):
 
 # -------------------------------------------------------------------------------
 
-def plot_spiral(vol_pct, price_pct):
+def plot_spiral(data_path="datasets/df_spiral.csv", vol_pct=20, price_pct=20):
     import pandas as pd
     from matplotlib.collections import LineCollection
     from adjustText import adjust_text
@@ -418,106 +418,114 @@ def plot_spiral(vol_pct, price_pct):
     import matplotlib.colors as mcolors
     from matplotlib.animation import FuncAnimation
     # Loading data
-    data = f"data/global_vol{vol_pct}_price{price_pct}.csv"
-    save_path = f"figs/spiral-vol{vol_pct}-price{price_pct}.mp4"
+    if data_path is None:
+        data = f"data/global_vol{vol_pct}_price{price_pct}.csv"
+        save_path = f"figs/spiral-vol{vol_pct}-price{price_pct}.mp4"
 
-    df = pd.read_csv(data)
+        df = pd.read_csv(data)
 
-    # Grouping to get average close per day
-    df = df.loc[:, ["report_date", "close (%)", "close"]].groupby("report_date").mean()
+        # Grouping to get average close per day
+        df = df.loc[:, ["report_date", "close (%)", "close"]].groupby("report_date").mean()
 
-    # Daily change
-    df.reset_index(inplace=True)
-    df["change_day"] = df["close"] - df["close"].shift(1, fill_value=0)
-    df.loc[0, "change_day"] = 0
-    df["report_date"] = pd.to_datetime(df["report_date"])
+        # Daily change
+        df.reset_index(inplace=True)
+        df["change_day"] = df["close"] - df["close"].shift(1, fill_value=0)
+        df.loc[0, "change_day"] = 0
+        df["report_date"] = pd.to_datetime(df["report_date"])
 
-    # AI helped make this code
-    # ------------------------------------------------------------
-    # Yearly Change
-    df['Target_Date'] = df['report_date'] - pd.DateOffset(years=1)
+        # AI helped make this code
+        # ------------------------------------------------------------
+        # Yearly Change
+        df['Target_Date'] = df['report_date'] - pd.DateOffset(years=1)
 
-    df_lookup = df[['report_date', 'close']].rename(
-        columns={'report_date': 'Matched_Date', 'close': 'close_1yr_ago'}
-    )
+        df_lookup = df[['report_date', 'close']].rename(
+            columns={'report_date': 'Matched_Date', 'close': 'close_1yr_ago'}
+        )
 
-    df = pd.merge_asof(
-        df,
-        df_lookup,
-        left_on='Target_Date',
-        right_on='Matched_Date',
-        direction='backward',
-        tolerance=pd.Timedelta(days=4)
-    )
-    df.drop(columns=["Target_Date", "Matched_Date"], inplace=True)
+        df = pd.merge_asof(
+            df,
+            df_lookup,
+            left_on='Target_Date',
+            right_on='Matched_Date',
+            direction='backward',
+            tolerance=pd.Timedelta(days=4)
+        )
+        df.drop(columns=["Target_Date", "Matched_Date"], inplace=True)
 
-    # Monthly change
-    df['Target_Date'] = df['report_date'] - pd.DateOffset(months=1)
+        # Monthly change
+        df['Target_Date'] = df['report_date'] - pd.DateOffset(months=1)
 
-    df_lookup = df[['report_date', 'close']].rename(
-        columns={'report_date': 'Matched_Date', 'close': 'close_1mo_ago'}
-    )
+        df_lookup = df[['report_date', 'close']].rename(
+            columns={'report_date': 'Matched_Date', 'close': 'close_1mo_ago'}
+        )
 
-    df = pd.merge_asof(
-        df,
-        df_lookup,
-        left_on='Target_Date',
-        right_on='Matched_Date',
-        direction='backward',
-        tolerance=pd.Timedelta(days=4)
-    )
-    df.drop(columns=["Target_Date", "Matched_Date"], inplace=True)
-    # ------------------------------------------------------------
+        df = pd.merge_asof(
+            df,
+            df_lookup,
+            left_on='Target_Date',
+            right_on='Matched_Date',
+            direction='backward',
+            tolerance=pd.Timedelta(days=4)
+        )
+        df.drop(columns=["Target_Date", "Matched_Date"], inplace=True)
+        # ------------------------------------------------------------
 
-    df["change_year"] = df["close"] - df["close_1yr_ago"]
-    df["change_month"] = df["close"] - df["close_1mo_ago"]
+        df["change_year"] = df["close"] - df["close_1yr_ago"]
+        df["change_month"] = df["close"] - df["close_1mo_ago"]
 
-    # Close since beginning
-    df["close (%)"] = (df["close"] - df.loc[0,"close"]) / df.loc[0,"close"] * 100
+        # Close since beginning
+        df["close (%)"] = (df["close"] - df.loc[0,"close"]) / df.loc[0,"close"] * 100
 
-    # Seperate month and day for rotation of data point
-    df['month'] = pd.DatetimeIndex(df['report_date']).month
-    df["day"] = pd.DatetimeIndex(df['report_date']).day
+        # Seperate month and day for rotation of data point
+        df['month'] = pd.DatetimeIndex(df['report_date']).month
+        df["day"] = pd.DatetimeIndex(df['report_date']).day
 
-    # Rotation prep based on month 
-    month_to_degree = {m: (m - 1) * 30 for m in range(1, 13)}
-    df["month_rotation"] = df["month"].map(month_to_degree.get)
+        # Rotation prep based on month 
+        month_to_degree = {m: (m - 1) * 30 for m in range(1, 13)}
+        df["month_rotation"] = df["month"].map(month_to_degree.get)
 
-    # Get max and min day of month
-    df['report_date'] = pd.to_datetime(df['report_date'])
-    df['year'] = df['report_date'].dt.year
+        # Get max and min day of month
+        df['report_date'] = pd.to_datetime(df['report_date'])
+        df['year'] = df['report_date'].dt.year
 
-    month_bounds = df.groupby(['year', 'month'])['day'].agg(['min', 'max']).reset_index()
-    month_bounds.rename(columns={'min': 'min_day', 'max': 'max_day'}, inplace=True)
+        month_bounds = df.groupby(['year', 'month'])['day'].agg(['min', 'max']).reset_index()
+        month_bounds.rename(columns={'min': 'min_day', 'max': 'max_day'}, inplace=True)
 
-    df = df.merge(month_bounds, on=['year', 'month'])
+        df = df.merge(month_bounds, on=['year', 'month'])
 
-    # AI helped make this code
-    # ------------------------------------------------------------
-    # Get month progress from 0 to 1 and compute the total rotation for datapoint based on month and month progress
-    df['day_progress'] = (df['day'] - df['min_day']) / (df['max_day'] - df['min_day']).replace(0, 1)
-    df['day_degrees'] = df['month'].map(month_to_degree) + (df['day_progress'] * 30)
-    # ------------------------------------------------------------
+        # AI helped make this code
+        # ------------------------------------------------------------
+        # Get month progress from 0 to 1 and compute the total rotation for datapoint based on month and month progress
+        df['day_progress'] = (df['day'] - df['min_day']) / (df['max_day'] - df['min_day']).replace(0, 1)
+        df['day_degrees'] = df['month'].map(month_to_degree) + (df['day_progress'] * 30)
+        # ------------------------------------------------------------
 
-    # Cleanup
-    df = df.drop(columns=['min_day', 'max_day', 'day_progress'])
+        # Cleanup
+        df = df.drop(columns=['min_day', 'max_day', 'day_progress'])
 
-    # Compute the zero point, so that distance from centre not negative and add a little spacing
-    shift_zero = abs(df["close (%)"].min()) + 5
-    shift_zero = (int(shift_zero/10)+1)*10 # Round up to the tens to add more spacing
-    df["distance_from_center"] = df["close (%)"] + shift_zero # distance from centre
+        # Compute the zero point, so that distance from centre not negative and add a little spacing
+        shift_zero = abs(df["close (%)"].min()) + 5
+        shift_zero = (int(shift_zero/10)+1)*10 # Round up to the tens to add more spacing
+        df["distance_from_center"] = df["close (%)"] + shift_zero # distance from centre
 
-    # compute the vector positions of points based on distance from centre and rotation 
-    from numpy import cos, sin, radians
-    df["x"] = df["distance_from_center"] * sin(radians(df["day_degrees"]))
-    df["y"] = df["distance_from_center"] * cos(radians(df["day_degrees"]))
-    # get continous time
-    df["cont_time"] = df.index
+        # compute the vector positions of points based on distance from centre and rotation 
+        from numpy import cos, sin, radians
+        df["x"] = df["distance_from_center"] * sin(radians(df["day_degrees"]))
+        df["y"] = df["distance_from_center"] * cos(radians(df["day_degrees"]))
+        # get continous time
+        df["cont_time"] = df.index
+    else:
+        df = pd.read_csv(data_path)
+        month_to_degree = {m: (m - 1) * 30 for m in range(1, 13)}
+        shift_zero = abs(df["close (%)"].min()) + 5
+        shift_zero = (int(shift_zero/10)+1)*10
+        save_path = f"spiral-vol{vol_pct}-price{price_pct}.mp4"
+        df["report_date"] = pd.to_datetime(df["report_date"])
 
     #Plot Settings
     plt.rc('font', family='sans-serif', serif=["Open Sans"])
     
-    minor_line_settings = ("#E1E1DD", 0.8, 1, "-") 
+    minor_line_settings = ("#C8C8C7", 0.8, 1, "-") 
     major_line_settings = ("#000000", 1.3, 1, "-") 
     data_line_settings = ("twilight_shifted", 2.5, (0.75, 1), "-") 
     facecolor ="#FAF9F6"
@@ -593,7 +601,7 @@ def plot_spiral(vol_pct, price_pct):
         
         ax.plot([start_point[0], end_point[0]], [start_point[1], end_point[1]], 
                 color=minor_line_settings[0], alpha=minor_line_settings[2], 
-                lw=minor_line_settings[1], linestyle=minor_line_settings[3], zorder=0)
+                lw=minor_line_settings[1], linestyle=minor_line_settings[3], zorder=0, clip_on=False)
         
         # Month text
         text_point = rotate_vector(np.array([0, radii[ring_num]+3]), -angle) 
@@ -701,10 +709,10 @@ def plot_spiral(vol_pct, price_pct):
     ax_bar.yaxis.set_label_position("right")
 
     # Zero reference line
-    ax_bar.axhline(0, color=major_line_settings[0], linewidth=0.8, linestyle=major_line_settings[3], zorder=1) # Zero line
+    ax_bar.axhline(0, color=major_line_settings[0], linewidth=0.8, linestyle=major_line_settings[3], zorder=2) # Zero line
 
     # Initialize dynamic bar, range markers, and labels
-    bar_rect = ax_bar.bar(0, 0, width=2, color=major_line_settings[0], zorder=2)[0]
+    bar_rect = ax_bar.bar(0, 0, width=2, color=major_line_settings[0], zorder=1)[0]
     line_min, = ax_bar.plot([-1, 1], [0, 0], color=red, linestyle=major_line_settings[3], linewidth=major_line_settings[1], zorder=3)
     line_max, = ax_bar.plot([-1, 1], [0, 0], color=green, linestyle=major_line_settings[3], linewidth=major_line_settings[1], zorder=3)
 
