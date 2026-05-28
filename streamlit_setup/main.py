@@ -612,7 +612,7 @@ if st.session_state["finalized"]:
         fig, cbar = generate_heatmap(df_mom)
         
         # store the html code for the plot in the parameters, display it on the placeholder
-        st.session_state["heatmap_html"] = get_open_scrollable_svg_html(fig, 700, border_radius= '20')
+        st.session_state["heatmap_html"] = get_open_scrollable_svg_html(fig, 700, border_radius= '20', napoli= True)
         plot_placeholder_3.write(st.session_state["heatmap_html"], unsafe_allow_html=True)
         plt.close(fig)
 
