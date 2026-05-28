@@ -270,7 +270,7 @@ plot_placeholder.markdown(
     }
     .loading-skeleton {
         width: 100%;
-        height: 357px;
+        height: 352px;
         background-color: #FAF9F6;
         border: 2px dashed #BF8755;
         border-radius: 8px;
