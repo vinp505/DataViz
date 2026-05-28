@@ -1,38 +1,48 @@
+"""
+Module containing all functions needed to create matplotlib figures for the charts.
+"""
+
+# -------------------------------------------------------------------------------
+
 import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib.colors as mcolors
 
-def generate_week_lineplot_title(color_list):
-
-    fig, axes = plt.subplots(1, 4, facecolor= '#FAF9F6', figsize= (64, 3))
-    for i, ax in enumerate(axes.flatten()):
-
-        ax.axis('off')
-        if i <= 3:
-            ax.set_xlim(-5, 5)
-            ax.set_ylim(-1, 1)
-            ax.text(x= 0, y= -0.8, s= f"Stock {i+1}", c= '#000000', ha= 'center', weight= 550, size= 50)
-            #ax.text(x= 0, y= -0.8, s= f"Stock {i+1}", c= color_list[i], ha= 'center', weight= 550, size= 50)
-            ax.hlines(y= -1, xmin= -1.5, xmax= 1.5, colors= 'black', linewidth= 8, clip_on= False)
-    
-    return fig
+# -------------------------------------------------------------------------------
 
 def generate_week_lineplot(df_list, color_list, seed):
     
     fig, axes = plt.subplots(1, 4, facecolor= "#FAF9F6", figsize= (64, 16))
 
+    # seed will be passed from the session state parameters
     w = seed  # np.random.randint(14, 1759)
+    
+    # initialize list to store datasets
     df_week_list = []
+
+    # store min and max change to properly calibrate axes range
     close_min, close_max = np.inf, -np.inf
+
+    # extra - not used
     stock_min_peak, stock_max_peak = None, None
     close_min_final, close_max_final = np.inf, -np.inf
     stock_min_final, stock_max_final = 0, 0
 
+    # iterate through datasets
     for i, df in enumerate(df_list):
+
+        # only keep the 14 most recent datapoints up until the seed index
         df_week = df.iloc[w-14 : w].copy()
+
+        # obtain baseline value
         baseline = df_week['close'].values[0]
+
+        # new column: compute difference of each closing value in $ from baseline and turn it into % change 
         df_week['week close (%)'] = ((df_week['close'] - baseline) / baseline) * 100
         
+
+        # obtain and store min and max % values
+
         cmin = df_week['week close (%)'].min()
         cmax = df_week['week close (%)'].max()
 
@@ -53,7 +63,8 @@ def generate_week_lineplot(df_list, color_list, seed):
         if fc_val > close_max_final:
             close_max_final = fc_val
             stock_max_final = i
-            
+
+        # store filtered dataset 
         df_week_list.append(df_week)
     
 
@@ -207,8 +218,8 @@ def generate_heatmap(sector_mom):
     fig.subplots_adjust(top= 1, bottom= 0, left=0, right=1)
     ax.set_facecolor(FACE)
     ax.axis("off")
-    # colormap
-    red, grey, green = '#FAAC68', FACE, '#5A9CB5'
+    # ── colormap (unchanged) ─────────────────────────────────────────────────
+    red, grey, green = '#D06A4C', FACE, '#4C98CE'
     cmap = mcolors.LinearSegmentedColormap.from_list('RdGrGn', [red, grey, green])
 
     im = ax.imshow(
@@ -299,7 +310,7 @@ def generate_barplot(df, avg_close, ticks_2019: bool = False):
         diff_Q = [0] + [((sec_values[i] - sec_values[i-1]) / sec_values[i-1]) * 100 for i in range(1, len(sec_values))]
         
 
-        colors = ["#5A9CB5" if diff_Q[j] > 0 else "#FAAC68" for j in range(len(diff_Q))]
+        colors = ["#4C98CE" if diff_Q[j] > 0 else "#D06A4C" for j in range(len(diff_Q))]
         
         bars2 = ax.bar(range(len(diff_Q)), diff_Q, color= colors)
         for i, val in enumerate(sec_values_lday_perc):

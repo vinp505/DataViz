@@ -72,7 +72,7 @@ def get_aligned_text_row(text: list | str, alignments: list | str, left_padding=
 def get_open_scrollable_svg_html(fig, height=500, padding_topbottom= "10", padding_leftright = "20"):
     """Encase a plot in a scrollable html element. Used to plot complete heatmap and barchart."""
     
-    # !! Gemini code - mostly
+    # !! Gemini code - adapted for aesthetic purposes (only kept left margin of the box)
     # --------------
 
     # convert matplotlib figure into svg format
@@ -94,7 +94,7 @@ def get_open_scrollable_svg_html(fig, height=500, padding_topbottom= "10", paddi
         padding: {padding_topbottom}px {padding_leftright}px;
         box-sizing: border-box;
     ">
-        <img src="data:image/svg+xml;base64,{b64}" style="width: 100%; height: auto; display: block;"/>
+        <img src="data:image/svg+xml;base64,{b64}" style="width: 100%; height: auto; display: block; border-radius: 8px;"/>
     </div>
 
     <div style="
@@ -121,7 +121,7 @@ def get_open_scrollable_svg_html_inverted(fig, height=500):
     Used to plot the complete linechart.
     """
     
-    # !! Gemini code
+    # !! Gemini code - adapted for aesthetic purposes (only kept left margin of the box)
     # --------------
     imgdata = StringIO()
     fig.savefig(imgdata, format="svg", bbox_inches="tight")
@@ -141,7 +141,7 @@ def get_open_scrollable_svg_html_inverted(fig, height=500):
         border-radius: 8px;
         background-color: #FAF9F6;
     ">
-        <img src="data:image/svg+xml;base64,{b64}" style="width: 100%; height: auto; display: block;"/>
+        <img src="data:image/svg+xml;base64,{b64}" style="width: 100%; height: auto; display: block; border-radius: 8px;"/>
     </div>
 
     <div style="
