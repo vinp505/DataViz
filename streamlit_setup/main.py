@@ -154,7 +154,7 @@ st.markdown(
 st.markdown(
     """
     <p style="font-family: sans-serif; font-size: 14px; color: #8C8C8C; line-height: 1.5; margin: 0;">
-        The page is meant to be viewed in the standard 16:9 ratio, and interactive elements such as buttons must not be pressed before the relative plot has loaded.
+        The page is meant to be viewed in the standard 16:9 ratio, with monitor scale of 100% or 150%, and interactive elements such as buttons must not be pressed before the relative plot has loaded.
     </p>
     """,
     unsafe_allow_html=True
