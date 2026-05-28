@@ -49,7 +49,11 @@ st.markdown("""
         border-color: #E6DCD2 !important;
         text-decoration: none !important;
     }
-
+    
+    .st-key-toggle_2019 button {
+        width: 200px !important;
+    }
+            
     .stSelectbox div[data-baseweb="select"] > div:first-child {
         border-color: #BF8755 !important;
     }
@@ -82,6 +86,8 @@ if "weekly_lineplot_html" not in st.session_state:
     st.session_state["weekly_lineplot_html"] = None
 if "heatmap_html" not in st.session_state:
     st.session_state["heatmap_html"] = None
+if "cbar_html" not in st.session_state:
+    st.session_state["cbar_html"] = None
 if "barplots_html" not in st.session_state:
     st.session_state["barplots_html"] = []
 
@@ -479,12 +485,18 @@ if st.session_state["finalized"]:
 
         # load data (cached), generate plot
         df_mom = heatmap_load_data()
-        fig = generate_heatmap(df_mom)
+        fig, cbar = generate_heatmap(df_mom)
         
         # store the html code for the plot in the parameters, display it on the placeholder
         st.session_state["heatmap_html"] = get_open_scrollable_svg_html(fig, 700, border_radius= '20')
         plot_placeholder_3.write(st.session_state["heatmap_html"], unsafe_allow_html=True)
         plt.close(fig)
+
+        # cache and display colorbar
+        st.session_state["cbar_html"] = get_svg_html(cbar)
+        col00, col0, col1, col2, col3, col4 = st.columns([0.5, 0.5, 2, 1, 1, 1], vertical_alignment="center")
+        with col3:
+            st.write(st.session_state["cbar_html"], unsafe_allow_html= True)
 
         # mindfulness blabla
         st.space(10)
@@ -493,7 +505,12 @@ if st.session_state["finalized"]:
     
     # if the plot was already generated, display the cached code
     else:
+        
         st.write(st.session_state["heatmap_html"], unsafe_allow_html=True)
+        
+        col00, col0, col1, col2, col3, col4 = st.columns([0.5, 0.5, 2, 1, 1, 1], vertical_alignment="center")
+        with col3:
+            st.write(st.session_state["cbar_html"], unsafe_allow_html= True)
 
 # -----------------------------------------------------------
 
@@ -505,12 +522,14 @@ if st.session_state["finalized"]:
     st.write("Add text")
 
     # button to control wether to show change from 2019 on the plot, initial state is 'not displayed'
+    col1, _ = st.columns([3, 7], vertical_alignment="center")
     button_text = "Show change from 2019" if not st.session_state['barplots_idx'] else "Hide change from 2019"
-    if st.button(button_text):
+    with col1:
+        if st.button(button_text, key="toggle_2019"):
 
-        # flip the barplot idx (0 to 1 / 1 to 0)
-        st.session_state['barplots_idx'] = 1 - st.session_state['barplots_idx']
-        st.rerun()
+            # flip the barplot idx (0 to 1 / 1 to 0)
+            st.session_state['barplots_idx'] = 1 - st.session_state['barplots_idx']
+            st.rerun()
     
     # if no code for the barplots is cached, create both versions (with and without 2019 change)
     if st.session_state["barplots_html"] == []:

@@ -288,7 +288,7 @@ def generate_heatmap(sector_mom):
         sp.set_visible(False)
 
     #colorbar
-    colorbar, ax = plt.subplots(figsize=0.35, facecolor=FACE)
+    colorbar, ax  = plt.subplots(figsize=(5, 0.35) , facecolor = FACE)
     colorbar.subplots_adjust(left=0, right=1, top=1, bottom=0)
 
     cb = colorbar.colorbar(
@@ -299,11 +299,11 @@ def generate_heatmap(sector_mom):
     cb.set_ticks([])
     cb.outline.set_visible(False)
     cb.ax.text(0, 0.5, f'{-vlim:.1f}% ', transform=cb.ax.transAxes,
-               ha='right', va='center', fontsize=9, fontweight='bold')
+               ha='right', va='center', fontsize=18, fontweight='bold')
     cb.ax.text(1, 0.5, f' {vlim:.1f}%', transform=cb.ax.transAxes,
-               ha='left', va='center', fontsize=9, fontweight='bold')
+               ha='left', va='center', fontsize=18, fontweight='bold')
 
-    return [fig, colorbar]
+    return fig, colorbar
 
 # -------------------------------------------------------------------------------
 
