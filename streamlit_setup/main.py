@@ -17,7 +17,7 @@ from html_functions import get_aligned_text_row, get_svg_html, get_open_scrollab
 
 st.set_page_config(layout="wide")
 
-# !! Gemini code skeleton - parameters manually set
+# !! Gemini code skeleton - parameters (mainly colors) manually set
 # -----------------------
 st.markdown("""
     <style>
@@ -30,6 +30,11 @@ st.markdown("""
         transition: background-color 0.5s ease, border-color 0.5s ease !important;
     }
     
+    .stApp, .stApp *:not(input):not(textarea) {
+        user-select: none !important;
+        -webkit-user-select: none !important; /* Safari */
+    }
+            
     /* Button Hover */
     div[data-testid="stButton"] button:hover {
         background-color: #D38949 !important;
@@ -477,7 +482,7 @@ if st.session_state["finalized"]:
         fig = generate_heatmap(df_mom)
         
         # store the html code for the plot in the parameters, display it on the placeholder
-        st.session_state["heatmap_html"] = get_open_scrollable_svg_html(fig, 700)
+        st.session_state["heatmap_html"] = get_open_scrollable_svg_html(fig, 700, border_radius= '20')
         plot_placeholder_3.write(st.session_state["heatmap_html"], unsafe_allow_html=True)
         plt.close(fig)
 

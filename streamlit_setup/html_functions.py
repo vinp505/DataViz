@@ -69,7 +69,7 @@ def get_aligned_text_row(text: list | str, alignments: list | str, left_padding=
 
     return html
 
-def get_open_scrollable_svg_html(fig, height=500, padding_topbottom= "10", padding_leftright = "20"):
+def get_open_scrollable_svg_html(fig, height=500, padding_topbottom= "10", padding_leftright = "20", border_radius= '0'):
     """Encase a plot in a scrollable html element. Used to plot complete heatmap and barchart."""
     
     # !! Gemini code - adapted for aesthetic purposes (only kept left margin of the box)
@@ -94,7 +94,7 @@ def get_open_scrollable_svg_html(fig, height=500, padding_topbottom= "10", paddi
         padding: {padding_topbottom}px {padding_leftright}px;
         box-sizing: border-box;
     ">
-        <img src="data:image/svg+xml;base64,{b64}" style="width: 100%; height: auto; display: block; border-radius: 8px;"/>
+        <img src="data:image/svg+xml;base64,{b64}" style="width: 100%; height: auto; display: block; border-radius: {border_radius}px;"/>
     </div>
 
     <div style="
