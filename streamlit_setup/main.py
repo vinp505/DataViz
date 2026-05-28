@@ -133,7 +133,7 @@ st.markdown(
     """
     <p style="font-family: sans-serif; font-size: 16px; color: black; line-height: 1.5; margin: 0;">
         Using 2025-inflation-adjusted historic stock market data spanning from the beginning of 2019 to the end of 2025, four visualization sections follow.<br/>
-        The components of this webpage represent the path from subjective, narrow-context, feelings to broader, objective realities, with the goal of bridging the mental gap between an individual trader looking at their personal portfolio performance and the overarching trends of the market.
+        The components of this webpage represent the path from subjective, narrow-context feelings to broader, objective realities, with the goal of bridging the mental gap between an individual trader looking at their personal portfolio performance and the overarching trends of the market.
     </p>
     """,
     unsafe_allow_html=True
@@ -164,7 +164,7 @@ st.markdown(html_link, unsafe_allow_html=True)
 # -----------------------------------------------------------
 
 st.space(20)
-st.header("P1 — Individual Stocks — value % change over time", anchor= False)
+st.header("P1 — Individual Stocks — percentage change in value over time", anchor= False)
 
 # text formatted by Gemini
 st.markdown(
@@ -186,7 +186,7 @@ st.markdown(
     <p style="font-family: sans-serif; font-size: 16px; color: black; line-height: 1.5; margin: 0;">
         Below there are four snapshot line plots, each encoding the 14-days relative performance of the associated stock: the first day of the time window serves as a baseline, and the percentage change from this initial value is reported on the y-axis.
         The time frame is chosen at random, and is reported above the charts, together with a button to perform the date sampling, and subsequent plotting, again.
-        Based on the random snapshot plots, the goal is to assess the apparent reliability and profitability of each title over the long-term.
+        The goal is to assess the apparent reliability and profitability of each title over the long-term with the help of the random snapshot plots.
         Submit the stocks ordered from worst to best, based on what their overall performance evolution from 2019 might have been, to reveal the complete line plot.
     </p>
     """,
@@ -530,7 +530,7 @@ if st.session_state["finalized"]:
 # -----------------------------------------------------------
 
     st.space(20)
-    st.header("P2 — Industry Heatmap — MoM average value % change across industries", anchor= False)
+    st.header("P2 — Industry Heatmap — MoM percentage change in average value across industries", anchor= False)
     
     # text formatted by Gemini
     st.markdown(
@@ -642,13 +642,13 @@ if st.session_state["finalized"]:
 # -----------------------------------------------------------
 
     st.space(20)
-    st.header("P3 — Sector Evolution — quarterly average value % change across sectors", anchor= False)
+    st.header("P3 — Sector Evolution — quarterly percentage change in average value across sectors", anchor= False)
     
     # text formatted by Gemini
     st.markdown(
         """
         <p style="font-family: sans-serif; font-size: 16px; color: black; line-height: 1.5; margin: 0;">
-            The presented barplot presents quarterly sector performance, now showing broader market trends.<br/>
+            The barplot presents quarterly sector performance, now showing broader market trends.<br/>
             Negative quarters likely indicate systematic regression in price, rather than a temporary independent negative moment for specific industries or stocks, adding more context to long-term performance analysis.<br/>
             Each bar represents the change, in percentage, of the mean price across all sector-specific stocks from the last day of the previous quarter to the last day of the current quarter: positive values indicate that the average company is worth more at the end of the given quarter than it was at the end of the previous.<br/>
             After observing the graph, it is possible to add the sector-specific mean price percentage change from the beginning of 2019 for each quarter by clicking the button.<br/>
@@ -750,7 +750,7 @@ if st.session_state["finalized"]:
 # -----------------------------------------------------------
 
     st.space(20)
-    st.header("P4 — 2019-2025 Market Evolution — overall average value % change animated spiral", anchor= False)
+    st.header("P4 — 2019-2025 Market Evolution — overall percentage change in average value animated spiral", anchor= False)
     
     # text formatted by Gemini
     st.markdown(
