@@ -110,8 +110,8 @@ if "final_order" not in st.session_state:
     st.session_state["final_order"] = []
 
 # overall title and introduction
-st.title("Zooming Out: How Time and Category Granularity can affect the perception of Stock Data", anchor= False)
-st.subheader("A Data Visualization Project by ...", anchor= False)
+st.title("Zooming Out:How Time and Category Granularity can affect the perception of Stock Data", anchor= False)
+st.subheader("A Data Visualization Project by Bartosz Kochanski, Lukáš Trstenský, and Vincenzo Piras", anchor= False)
 st.write("Add introduction")
 
 
