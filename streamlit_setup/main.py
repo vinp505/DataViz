@@ -33,6 +33,12 @@ st.markdown("""
         transition: background-color 0.5s ease, border-color 0.5s ease !important;
     }
     
+    div[data-testid="stHorizontalBlock"] {
+        max-width: 1600px !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+    }
+            
     .stApp, .stApp *:not(input):not(textarea) {
         user-select: none !important;
         -webkit-user-select: none !important; /* Safari */
