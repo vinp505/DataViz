@@ -40,10 +40,17 @@ def lineplot_load_data():
     
     return df_list, color_list, name_list, x_ticks, x_labels
 
+# -------------------------------------------------------------------
+
+# simple dataset loading, with proper index col
 @st.cache_data
 def heatmap_load_data():
     return pd.read_csv("datasets/sector_mom.csv", index_col= 'industry')
 
+# -------------------------------------------------------------------
+
+# simple dataset loading, with proper index col
+# suffix is not used or changed
 @st.cache_data
 def barplot_load_data(df_suffix: str = "20th"):
     df = pd.read_csv(f"datasets/barplot/df_grouped_lday_abs-20th-{df_suffix}.csv", index_col= ['report_quarter', 'sector'])
