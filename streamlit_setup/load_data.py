@@ -4,8 +4,11 @@ Module to load (and cache) data needed for plotting.
 
 # -------------------------------------------------------------------
 
+from pathlib import Path
 import streamlit as st
 import pandas as pd
+
+current_dir = Path(__file__).resolve().parent
 
 # -------------------------------------------------------------------
 
@@ -19,7 +22,7 @@ def lineplot_load_data():
 
     # load the corresponding dataset based on the symbol
     for symbol in ['AAPL', 'AGCO', 'ADM', 'AAP']:
-        df = pd.read_csv(f"datasets/df_{symbol}.csv")
+        df = pd.read_csv(current_dir / f"datasets/df_{symbol}.csv")
         df_list.append(df)
 
     # labels logic: one every 2 months + change of year
@@ -45,7 +48,7 @@ def lineplot_load_data():
 # simple dataset loading, with proper index col
 @st.cache_data
 def heatmap_load_data():
-    return pd.read_csv("datasets/sector_mom.csv", index_col= 'industry')
+    return pd.read_csv(current_dir / "datasets/sector_mom.csv", index_col= 'industry')
 
 # -------------------------------------------------------------------
 
@@ -53,6 +56,6 @@ def heatmap_load_data():
 # suffix is not used or changed
 @st.cache_data
 def barplot_load_data(df_suffix: str = "20th"):
-    df = pd.read_csv(f"datasets/barplot/df_grouped_lday_abs-20th-{df_suffix}.csv", index_col= ['report_quarter', 'sector'])
-    baseline = pd.read_csv(f"datasets/barplot/avg_close_2019-20th-{df_suffix}.csv", index_col= ['report_date', 'sector'])
+    df = pd.read_csv(current_dir / f"datasets/barplot/df_grouped_lday_abs-20th-{df_suffix}.csv", index_col= ['report_quarter', 'sector'])
+    baseline = pd.read_csv(current_dir / f"datasets/barplot/avg_close_2019-20th-{df_suffix}.csv", index_col= ['report_date', 'sector'])
     return df, baseline
