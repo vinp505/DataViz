@@ -569,8 +569,8 @@ if st.session_state["finalized"]:
 
     years = ["2019", "2020", "2021", "2022", "2023", "2024", "2025"]
     col1, col2, col3, col4, col5, col6, col7, _ = st.columns([1, 1, 1, 1, 1, 1, 1, 0.5], vertical_alignment="center")
-    lpad_list = ["13.6%", "4.58%", "9.5%", "14%", "18%", "21.35%", "25.75%"]
-    linelen_list = ["195px", "220px", "220px", "220px", "220px", "220px", "218px"]
+    lpad_list = ["14.6%", "5.58%", "9.5%", "13.8%", "17.5%", "20.85%", "25%"]
+    linelen_list = ["195px", "220px", "220px", "220px", "220px", "220px", "200px"]
 
     for text, col, lpad, linelen in zip(years, [col1, col2, col3, col4, col5, col6, col7], lpad_list, linelen_list):
         text_html = get_aligned_text_row(text, alignments="left", 
