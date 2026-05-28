@@ -342,3 +342,395 @@ def generate_barplot(df, avg_close, ticks_2019: bool = False):
         ax.axis('off')
         
     return fig
+
+
+
+def plot_spiral(vol_pct, price_pct):
+    import pandas as pd
+    from matplotlib.collections import LineCollection
+    from adjustText import adjust_text
+    import matplotlib.patheffects as path_effects
+    import matplotlib.colors as mcolors
+    from matplotlib.animation import FuncAnimation
+    # Loading data
+    data = f"data/global_vol{vol_pct}_price{price_pct}.csv"
+    save_path = f"figs/spiral-vol{vol_pct}-price{price_pct}.mp4"
+
+    df = pd.read_csv(data)
+
+    # Grouping to get average close per day
+    df = df.loc[:, ["report_date", "close (%)", "close"]].groupby("report_date").mean()
+
+    # Daily change
+    df.reset_index(inplace=True)
+    df["change_day"] = df["close"] - df["close"].shift(1, fill_value=0)
+    df.loc[0, "change_day"] = 0
+    df["report_date"] = pd.to_datetime(df["report_date"])
+
+    # AI helped make this code
+    # ------------------------------------------------------------
+    # Yearly Change
+    df['Target_Date'] = df['report_date'] - pd.DateOffset(years=1)
+
+    df_lookup = df[['report_date', 'close']].rename(
+        columns={'report_date': 'Matched_Date', 'close': 'close_1yr_ago'}
+    )
+
+    df = pd.merge_asof(
+        df,
+        df_lookup,
+        left_on='Target_Date',
+        right_on='Matched_Date',
+        direction='backward',
+        tolerance=pd.Timedelta(days=4)
+    )
+    df.drop(columns=["Target_Date", "Matched_Date"], inplace=True)
+
+    # Monthly change
+    df['Target_Date'] = df['report_date'] - pd.DateOffset(months=1)
+
+    df_lookup = df[['report_date', 'close']].rename(
+        columns={'report_date': 'Matched_Date', 'close': 'close_1mo_ago'}
+    )
+
+    df = pd.merge_asof(
+        df,
+        df_lookup,
+        left_on='Target_Date',
+        right_on='Matched_Date',
+        direction='backward',
+        tolerance=pd.Timedelta(days=4)
+    )
+    df.drop(columns=["Target_Date", "Matched_Date"], inplace=True)
+    # ------------------------------------------------------------
+
+    df["change_year"] = df["close"] - df["close_1yr_ago"]
+    df["change_month"] = df["close"] - df["close_1mo_ago"]
+
+    # Close since beginning
+    df["close (%)"] = (df["close"] - df.loc[0,"close"]) / df.loc[0,"close"] * 100
+
+    # Seperate month and day for rotation of data point
+    df['month'] = pd.DatetimeIndex(df['report_date']).month
+    df["day"] = pd.DatetimeIndex(df['report_date']).day
+
+    # Rotation prep based on month 
+    month_to_degree = {m: (m - 1) * 30 for m in range(1, 13)}
+    df["month_rotation"] = df["month"].map(month_to_degree.get)
+
+    # Get max and min day of month
+    df['report_date'] = pd.to_datetime(df['report_date'])
+    df['year'] = df['report_date'].dt.year
+
+    month_bounds = df.groupby(['year', 'month'])['day'].agg(['min', 'max']).reset_index()
+    month_bounds.rename(columns={'min': 'min_day', 'max': 'max_day'}, inplace=True)
+
+    df = df.merge(month_bounds, on=['year', 'month'])
+
+    # AI helped make this code
+    # ------------------------------------------------------------
+    # Get month progress from 0 to 1 and compute the total rotation for datapoint based on month and month progress
+    df['day_progress'] = (df['day'] - df['min_day']) / (df['max_day'] - df['min_day']).replace(0, 1)
+    df['day_degrees'] = df['month'].map(month_to_degree) + (df['day_progress'] * 30)
+    # ------------------------------------------------------------
+
+    # Cleanup
+    df = df.drop(columns=['min_day', 'max_day', 'day_progress'])
+
+    # Compute the zero point, so that distance from centre not negative and add a little spacing
+    shift_zero = abs(df["close (%)"].min()) + 5
+    shift_zero = (int(shift_zero/10)+1)*10 # Round up to the tens to add more spacing
+    df["distance_from_center"] = df["close (%)"] + shift_zero # distance from centre
+
+    # compute the vector positions of points based on distance from centre and rotation 
+    from numpy import cos, sin, radians
+    df["x"] = df["distance_from_center"] * sin(radians(df["day_degrees"]))
+    df["y"] = df["distance_from_center"] * cos(radians(df["day_degrees"]))
+    # get continous time
+    df["cont_time"] = df.index
+
+    #Plot Settings
+    plt.rc('font', family='sans-serif', serif=["Open Sans"])
+    
+    minor_line_settings = ("#AFC0CA", 0.8, 1, "-") 
+    major_line_settings = ("#0C0C0C", 1.3, 1, "-") 
+    data_line_settings = ("twilight_shifted", 2.5, (0.75, 1), "-") 
+    facecolor ="#F5F4EF"
+    text_outline_settings = (facecolor, 1.5) 
+    step = 1  # Step through frames to set animation speed
+    color_base = df["change_day"] # base of cmap
+    # Colors for cmap
+    red = "#D06A4C"
+    grey= "#898989"
+    green = "#8E8CEA"
+
+    # Dynamic color settings
+    GREY_COLOR_RGB = mcolors.to_rgb("#E1E3E4")  # Faded color
+    WINDOW_SIZE = 300                    # The sliding window in days/rows
+
+    x = df["x"].values
+    y = df["y"].values
+
+    # AI helped make this code
+    # ------------------------------------------------------------
+    # Reshape points for LineCollection
+    points = np.array([x, y]).T.reshape(-1, 1, 2)
+    segments = np.concatenate([points[:-1], points[1:]], axis=1)
+    # ------------------------------------------------------------
+
+    # Setup cmap for daily gain or losses
+    colors_list = [red, grey, green]
+    cmap = mcolors.LinearSegmentedColormap.from_list("RdGrGn", colors_list)
+    norm = mcolors.CenteredNorm(halfrange=2)
+    
+    # Compute colors and assign to segments
+    rgba_values = cmap(norm(color_base))
+    segment_colors = rgba_values[:-1]
+
+    # Setup Axes
+    fig, ax = plt.subplots(figsize=(13, 10), facecolor=facecolor)
+    ax_bar = fig.add_axes([0.88, 0.05, 0.03, 0.9], facecolor=facecolor )
+
+    # Draw static elements; get max distance and month angles
+    max_dist = df['distance_from_center'].max()
+    angles = list(month_to_degree.values())
+
+    # AI helped make this code
+    # ------------------------------------------------------------
+    # Helper for rotating vector based on degree
+    def rotate_vector(vector, angle_degrees):
+        theta = np.radians(angle_degrees)
+        c, s = np.cos(theta), np.sin(theta)
+        R = np.array(((c, -s), (s, c)))
+        return vector @ R.T
+    # ------------------------------------------------------------
+
+    # Get radii for rings
+    radii = np.arange(-round(shift_zero, -1), round(max_dist, -1), 10) + shift_zero
+    radii = radii[radii > 0]
+    raddi_to_idx = {r: i for i, r in enumerate(radii)}
+
+    # Setup for  Month labeling
+    month_texts = []
+    months = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D']
+
+    # Month axis ring index and last displayed ring index
+    ring_num = raddi_to_idx[round(df[df["x"] == 0]["y"].max(), -1) + shift_zero] - 2
+    last_ring = -2
+
+    # AI helped make this code
+    # ------------------------------------------------------------
+    # plot month lines and labels
+    for i, angle in enumerate(angles):
+        start_point = np.array([0, 0]) # Start line in centre
+        end_point = rotate_vector(np.array([0, radii[last_ring-1]+2]), -angle) # end line at last ring and rotate
+        
+        ax.plot([start_point[0], end_point[0]], [start_point[1], end_point[1]], 
+                color=minor_line_settings[0], alpha=minor_line_settings[2], 
+                lw=minor_line_settings[1], linestyle=minor_line_settings[3], zorder=0)
+        
+        # Month text
+        text_point = rotate_vector(np.array([0, radii[ring_num]+3]), -angle) 
+        
+        t = ax.text(text_point[0], text_point[1], str(months[i]), color=major_line_settings[0],
+                    fontsize=10, fontweight='bold', alpha=major_line_settings[2], ha='center', va='center')
+        t.set_path_effects([path_effects.Stroke(linewidth=text_outline_settings[1], foreground=text_outline_settings[0]), path_effects.Normal()]) # Add outline for better visibility
+        month_texts.append(t)
+        
+    # Add percentage labels    
+    for i, r in enumerate(radii[:last_ring]):
+        x_val, y_val = rotate_vector(np.array([0, r+3]), -angles[2]+angles[1]/2)
+        label = f"{int(round(r - shift_zero))}%"
+        if (r == 0 + shift_zero) or i == ring_num: # zero line and last line
+            t = ax.text(x_val, y_val, label, color=major_line_settings[0], fontsize=8, fontweight='bold',
+                        alpha=major_line_settings[2], ha='center', va='center')
+        elif (r == -10 + shift_zero) or (r == 10 + shift_zero) or (i == ring_num-1) or (i == ring_num+1): # one before and after highlighted rings
+            t = ax.text(x_val, y_val, label, color=minor_line_settings[0], fontsize=8, fontweight='bold',
+                        alpha=minor_line_settings[2], ha='center', va='center')
+        t.set_path_effects([path_effects.Stroke(linewidth=text_outline_settings[1], foreground=text_outline_settings[0]), path_effects.Normal()]) # Add outline for better visibility
+    
+    # Plot rings
+    for i, r in enumerate(radii[:last_ring]):
+        use_major = (r == radii[ring_num]) # Major when month axis ring
+        circle = plt.Circle((0, 0), r, color=major_line_settings[0] if use_major else minor_line_settings[0],
+                            fill=False, linestyle=major_line_settings[3] if use_major else minor_line_settings[3],
+                            linewidth=major_line_settings[1] if use_major else minor_line_settings[1],
+                            alpha=major_line_settings[2] if use_major else minor_line_settings[2], zorder=0, clip_on=False)
+        ax.add_patch(circle)
+
+    circle = plt.Circle((0, 0), shift_zero, color=major_line_settings[0], fill=False,
+                        linestyle=major_line_settings[3], linewidth=major_line_settings[1],
+                        alpha=major_line_settings[2], zorder=0, clip_on=False) # Zero ring
+    ax.add_patch(circle)
+    # ------------------------------------------------------------
+
+    # Initialize line collection
+    lc = LineCollection(segments[0:0], colors=segment_colors[0:0])
+    lc.set_linewidth(data_line_settings[1])
+    ax.add_collection(lc)
+    lc.set_path_effects([
+        path_effects.withStroke(linewidth=5, foreground=text_outline_settings[0])
+    ]) # Add outline for visibility
+
+    # Prepare year annotations
+    first_year_indices = df.drop_duplicates(subset='year', keep='first').index
+    texts = []
+    annotation_objects = []
+
+    # AI helped make this code
+    # ------------------------------------------------------------
+    for idx in first_year_indices:
+        year = df.loc[idx, 'year']
+        val = df.loc[idx, "change_year"]
+        x_pos = df.loc[idx, 'x']
+        x_pos_text = df.loc[idx, 'x'] + 1.5
+        y_pos = df.loc[idx, 'y']
+        y_pos_text = df.loc[idx+3, 'y'] if (idx+3) in df.index else df.loc[idx, 'y']
+        alpha = rgba_values[:, 3][idx]
+        point_color = cmap(norm(val)) if idx > 0 else cmap(norm(0))
+
+        tick_length = 4
+        tick_line, = ax.plot([x_pos, x_pos], [y_pos - tick_length/2, y_pos + tick_length/2], 
+                            color=point_color, lw=1.5, zorder=10, alpha=alpha)
+        
+        t = ax.text(x_pos_text, y_pos_text, str(year), color=point_color, fontsize=10, fontweight='bold', alpha=alpha)
+        t.set_path_effects([path_effects.Stroke(linewidth=text_outline_settings[1], foreground=text_outline_settings[0]), path_effects.Normal()]) # Add outline for better visibility
+        
+        texts.append(t)
+        annotation_objects.append({'idx': idx, 'tick': tick_line, 'text': t, 'arrow': None})
+
+    adjust_text(texts, ax=ax) # Adjust positions to prevent overlap
+
+    for ann in annotation_objects: # Set annotations invisible
+        ann['tick'].set_visible(False)
+        ann['text'].set_visible(False)
+    # ------------------------------------------------------------
+
+
+    # Set view limits and posititons
+    outer_limit = radii[last_ring-1]
+    ax.set_xlim(-outer_limit+1, outer_limit+1)
+    ax.set_ylim(-outer_limit+1, outer_limit+1)
+    ax.set_aspect('equal')
+    ax.axis('off')
+    fig.subplots_adjust(left=0.01, right=0.84, top=0.98, bottom=0.02)
+
+    # Configure side bar
+    bar_data = df["close (%)"].values
+    max_abs_val = max(abs(bar_data.min()), abs(bar_data.max()))
+
+    # AI helped make this code
+    # ------------------------------------------------------------
+    # Format bar axis bounds and aesthetics
+    ax_bar.set_xlim(-0.8, 1.2)
+    ax_bar.set_ylim(-max_abs_val * 1.15, max_abs_val * 1.15)
+    ax_bar.spines['top'].set_visible(False)
+    ax_bar.spines['right'].set_visible(True)
+    ax_bar.spines['right'].set_color(minor_line_settings[0])
+    ax_bar.spines['left'].set_visible(False)
+    ax_bar.spines['bottom'].set_visible(False)
+    ax_bar.get_xaxis().set_visible(False)
+    ax_bar.tick_params(axis='y', labelsize=8, colors=minor_line_settings[0]) # y-axis ticks
+    ax_bar.yaxis.tick_right()
+    ax_bar.yaxis.set_label_position("right")
+
+    # Zero reference line
+    ax_bar.axhline(0, color=major_line_settings[0], linewidth=0.8, linestyle=major_line_settings[3], zorder=1) # Zero line
+
+    # Initialize dynamic bar, range markers, and labels
+    bar_rect = ax_bar.bar(0, 0, width=2, color=major_line_settings[0], zorder=2)[0]
+    line_min, = ax_bar.plot([-1, 1], [0, 0], color=red, linestyle=major_line_settings[3], linewidth=major_line_settings[1], zorder=3)
+    line_max, = ax_bar.plot([-1, 1], [0, 0], color=green, linestyle=major_line_settings[3], linewidth=major_line_settings[1], zorder=3)
+
+    # Static layout text containers to display numerical values alongside markers
+    text_min = ax_bar.text(-1, 0, '', color=red, fontsize=8, fontweight='bold', va='center', ha='right')
+    text_max = ax_bar.text(-1, 0, '', color=green, fontsize=8, fontweight='bold', va='center', ha='right')
+
+    # Heler to get dynamic colors
+    def get_dynamic_colors(frame, base_colors, grey_rgb, window):
+        current_colors = base_colors[:frame].copy()
+        if frame == 0:
+            return current_colors
+        
+        start_idx = max(0, frame - window)
+        if start_idx > 0:
+            current_colors[:start_idx, :3] = grey_rgb # Grey from line start to beginning of color
+            
+        gradient_len = frame - start_idx
+        if gradient_len > 0:
+            factors = np.ones((gradient_len, 1)) # Setup factors array as full color
+            if gradient_len > 100:
+                factors[:-100] = np.linspace(0, 1, gradient_len - 100).reshape(-1, 1) # Make grafient factors for first one hundred
+            original_rgb = current_colors[start_idx:frame, :3] # Get original colors
+            blended_rgb = (1 - factors) * np.array(grey_rgb) + factors * original_rgb # blend grey to color
+            current_colors[start_idx:frame, :3] = blended_rgb 
+            
+        return current_colors # return new dynamic color array
+
+    final_dot = ax.scatter([], [], s=20, zorder=5) # Highlight the current point
+
+
+    # Aimation update
+    def update(frame):
+        current_segments = segments[:frame]
+        
+        # Generate the sliding dynamic colors for this frame
+        current_colors = get_dynamic_colors(
+            frame=frame, 
+            base_colors=segment_colors, 
+            grey_rgb=GREY_COLOR_RGB, 
+            window=WINDOW_SIZE
+        )
+
+        # Set line segments
+        lc.set_segments(current_segments)
+        lc.set_colors(current_colors[1:])
+        
+        # Update side bar statistics
+        idx = min(frame, len(bar_data) - 1)
+        current_val = bar_data[idx]
+        
+        # Compute running historical boundaries up to current frame
+        historical_subset = bar_data[:idx + 1]
+        hist_min = historical_subset.min()
+        hist_min_idx = historical_subset.argmin()
+        hist_max = historical_subset.max()
+        hist_max_idx = historical_subset.argmax()
+        
+        # Update the bar metrics
+        bar_rect.set_height(current_val)
+        bar_rect.set_color(cmap(norm(current_val)))
+        
+        # Position and adjust horizontal threshold lines
+        line_min.set_ydata([hist_min, hist_min])
+        line_max.set_ydata([hist_max, hist_max])
+        
+        # Update text values next to thresholds
+        text_min.set_position((-1, hist_min))
+        text_min.set_text(f"Min\n{hist_min:+.1f}%\n{df.loc[hist_min_idx, "report_date"].strftime("%d/%m/%Y")}")
+        
+        text_max.set_position((-1, hist_max))
+        text_max.set_text(f"Max\n{hist_max:+.1f}%\n{df.loc[hist_max_idx, "report_date"].strftime("%d/%m/%Y")}")
+        
+        # Toggle year markers
+        for ann in annotation_objects:
+            is_visible = (frame >= ann['idx'])
+            ann['tick'].set_visible(is_visible)
+            ann['text'].set_visible(is_visible)
+
+    # Configure the animation steps
+    frames_indices = list(range(1, len(segments) + 1, step))
+    if frames_indices[-1] != len(segments):
+        frames_indices.append(len(segments))
+
+    ani = FuncAnimation(
+        fig, update, 
+        frames=frames_indices, 
+        interval=20, 
+        blit=False, 
+        repeat=False
+    ) # create animation
+    # ------------------------------------------------------------
+
+
+    ani.save(save_path, writer='ffmpeg', dpi=300) # Save animation as video
