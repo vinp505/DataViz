@@ -122,7 +122,7 @@ def get_open_scrollable_svg_html(fig, height=500, padding_topbottom= "10", paddi
     """
     # --------------
 
-    return html
+    return html.replace("\n", "").replace("  ", "")
 
 def get_open_scrollable_svg_html_inverted(fig, height=500):
     """
@@ -178,7 +178,7 @@ def get_open_scrollable_svg_html_inverted(fig, height=500):
     """
     # --------------
 
-    return html
+    return html.replace("\n", "").replace("  ", "")
 
 def get_svg_html(fig):
     """Saves a Matplotlib figure as an SVG string and returns it as a Base64 HTML tag."""
