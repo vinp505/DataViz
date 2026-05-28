@@ -88,7 +88,7 @@ def get_open_scrollable_svg_html(fig, height=500, padding_topbottom= "10", paddi
     <div style="
         position: relative; 
         width: 100%; 
-        max-width: 1200px; 
+        max-width: 1600px; 
         margin: 30px auto;
     ">
         
@@ -144,7 +144,7 @@ def get_open_scrollable_svg_html_inverted(fig, height=500):
     <div style="
         position: relative; 
         width: 100%; 
-        max-width: 1200px; 
+        max-width: 1600px; 
         margin: 30px auto;
     ">
         
