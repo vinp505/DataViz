@@ -12,6 +12,9 @@ import time
 from load_data import lineplot_load_data, heatmap_load_data, barplot_load_data
 from generate_plot import generate_week_lineplot, generate_final_lineplot, generate_heatmap, generate_barplot
 from html_functions import get_aligned_text_row, get_svg_html, get_open_scrollable_svg_html_inverted, get_open_scrollable_svg_html
+from pathlib import Path
+
+current_dir = Path(__file__).resolve().parent
 
 # -------------------------------------------------------------------------------
 
@@ -777,7 +780,7 @@ if st.session_state["finalized"]:
     
     with col2:
         st.video(
-            "spiral-vol20-price20.mp4",
+            current_dir / "spiral-vol20-price20.mp4",
             autoplay=True,
             loop=True,
             muted=True,
