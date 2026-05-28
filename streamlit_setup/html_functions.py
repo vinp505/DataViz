@@ -84,7 +84,7 @@ def get_open_scrollable_svg_html(fig, height=500, padding_topbottom= "10", paddi
     # encode in base 64 for html code
     b64 = base64.b64encode(svg_string.encode('utf-8')).decode("utf-8")
 
-    if napoli:
+    if not napoli:
         html = f"""
         <div style="
             position: relative; 
