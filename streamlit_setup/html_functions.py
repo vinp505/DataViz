@@ -69,7 +69,7 @@ def get_aligned_text_row(text: list | str, alignments: list | str, left_padding=
 
     return html
 
-def get_open_scrollable_svg_html(fig, height=500, padding_topbottom= "10", padding_leftright = "20", border_radius= '0'):
+def get_open_scrollable_svg_html(fig, height=500, padding_topbottom= "10", padding_leftright = "20", border_radius= '0', napoli= False):
     """Encase a plot in a scrollable html element. Used to plot complete heatmap and barchart."""
     
     # !! Gemini code - adapted for aesthetic purposes (only kept left margin of the box)
@@ -84,13 +84,45 @@ def get_open_scrollable_svg_html(fig, height=500, padding_topbottom= "10", paddi
     # encode in base 64 for html code
     b64 = base64.b64encode(svg_string.encode('utf-8')).decode("utf-8")
 
-    html = f"""
-    <div style="
-        position: relative; 
-        width: 100%; 
-        max-width: 1600px; 
-    ">
-        
+    if napoli:
+        html = f"""
+        <div style="
+            position: relative; 
+            width: 100%; 
+            max-width: 1600px; 
+        ">
+            
+            <div style="
+                height: {height}px; 
+                overflow-y: auto;
+                border-left: 3.5px solid #000000;
+                border-radius: 8px;
+                background-color: #FAF9F6;
+                padding: {padding_topbottom}px {padding_leftright}px;
+                box-sizing: border-box;
+            ">
+                <img src="data:image/svg+xml;base64,{b64}" style="width: 100%; height: auto; display: block; border-radius: {border_radius}px;"/>
+            </div>
+
+            <div style="
+                position: absolute; 
+                left: -30px; 
+                top: 50%; 
+                transform: translateY(-50%); 
+                font-size: 24px; 
+                color: #000000; 
+                pointer-events: none; 
+                opacity: 1;
+                user-select: none;
+            ">
+                ⬍
+            </div>
+            
+        </div>
+        """
+    
+    else:
+        html = f"""
         <div style="
             height: {height}px; 
             overflow-y: auto;
@@ -104,21 +136,19 @@ def get_open_scrollable_svg_html(fig, height=500, padding_topbottom= "10", paddi
         </div>
 
         <div style="
-            position: absolute; 
-            left: -30px; 
-            top: 50%; 
-            transform: translateY(-50%); 
-            font-size: 24px; 
-            color: #000000; 
-            pointer-events: none; 
-            opacity: 1;
-            user-select: none;
-        ">
-            ⬍
-        </div>
-        
-    </div>
-    """
+                position: absolute; 
+                left: -30px; 
+                top: 50%; 
+                transform: translateY(-50%); 
+                font-size: 24px; 
+                color: #000000; 
+                pointer-events: none; 
+                opacity: 1;
+                user-select: none;
+            ">
+                ⬍
+            </div>
+        """
     # --------------
 
     return html.replace("\n", "").replace("  ", "")
