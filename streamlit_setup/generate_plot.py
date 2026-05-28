@@ -517,17 +517,18 @@ def plot_spiral(vol_pct, price_pct):
     #Plot Settings
     plt.rc('font', family='sans-serif', serif=["Open Sans"])
     
-    minor_line_settings = ("#AFC0CA", 0.8, 1, "-") 
-    major_line_settings = ("#0C0C0C", 1.3, 1, "-") 
+    minor_line_settings = ("#E1E1DD", 0.8, 1, "-") 
+    major_line_settings = ("#000000", 1.3, 1, "-") 
     data_line_settings = ("twilight_shifted", 2.5, (0.75, 1), "-") 
-    facecolor ="#F5F4EF"
+    facecolor ="#FAF9F6"
     text_outline_settings = (facecolor, 1.5) 
     step = 1  # Step through frames to set animation speed
     color_base = df["change_day"] # base of cmap
     # Colors for cmap
     red = "#D06A4C"
-    grey= "#898989"
-    green = "#8E8CEA"
+    grey="#898989"
+    green = "#4C98CE"
+
 
     # Dynamic color settings
     GREY_COLOR_RGB = mcolors.to_rgb("#E1E3E4")  # Faded color

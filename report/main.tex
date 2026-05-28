@@ -10,7 +10,6 @@
 \usepackage{url}
 \usepackage{latexsym}
 \usepackage{graphicx}
-\usepackage{svg}
 \usepackage[hidelinks]{hyperref}
 \usepackage{algpseudocode}
 \usepackage{amsmath}
@@ -18,6 +17,7 @@
 \usepackage{booktabs}
 \usepackage{tabularx}
 \usepackage{microtype}
+\usepackage{subcaption}
 \usepackage{float}
 \usepackage[
     left=2cm,
@@ -69,8 +69,8 @@
         \href{https://github.com/vinp505/DataViz}{Code on GitHub}}
 
 
-\definecolor{paper}{HTML}{F7F5F0}
-\definecolor{main-text}{HTML}{2b2b2b}
+\definecolor{paper}{HTML}{FAF9F6}
+\definecolor{main-text}{HTML}{000000}
 \pagecolor{paper}
 \color{main-text}
 
@@ -115,7 +115,7 @@ We present four main visualisations of historic stock market data~\cite{defeatbe
 Data is first adjusted for inflation to the 2025 US Dollar. The data is then filtered based on the starting closing price of each stock and the average trading volume. Stocks above the 20th percentile of either their industry, sector, or global group, depending on the plot, are retained. This prevents penny stocks from skewing the average price and change in percentage, especially as their market importance is highly negligible and only relevant for a small group of people and businesses.
 
 \section{Chart Decisions and Justification}
-When actively engaging in trading, it is hard to rationalize the relatively short-term losses while comparing them with the overall portfolio performance: a sudden 5\% decrease from the previous week's values can eclipse the overall 15\% return for the current year, as well as questioning one's trading choices, not realizing the possibility of a broader market slowdown. Therefore, we decide to visualise this juxtaposition of subjective day-to-day feelings and objective, longer-term, realities to implore the reader to stay level-headed when faced with short-term challenges, whether they arise trading stocks or during everyday life.
+When actively engaging in trading it is hard to rationalize the relatively short-term losses while seeing the overall performance of your portfolio, as even if you are up 15\% in the year a seemingly sudden 5\% loss feels like your choices of trades are wrong, not realizing the possibility of a broader market slowdown. Therefore, we decided to try to visualise this juxtaposition of subjective day-to-day feelings and objective longer-term and broader realities to implore the reader to stay level-headed when faced with short-term challenges whether trading stocks or in everyday life. All colors [\autoref{fig:color-pallete}] used in plots were chosen to be colorblind friendly.
 
 \subsection{Short-term Long-term Disparity Exercise}
 With this exercise, we use multiple single-stock line charts to try to model the day-to-day experience of trading stocks; looking at bi-weekly return lines rising or falling, trying to remain optimistic that prior choices will result in log-term (showcased by the 2019-2025 line plot) profit, and not loss, but also grounded when short-term spikes occur.
@@ -132,5 +132,88 @@ Made as an alternative to a stacked line chart, the spiral allows for comparison
 
 \bibliographystyle{apalike}
 \bibliography{references}
+
+\appendix
+\section{Color Pallete}
+\begin{figure} [h]
+    \centering
+    \caption{Color Pallete}
+    \includegraphics[width=0.6\linewidth]{figs/color_pallete.pdf}
+    \label{fig:color-pallete}
+\end{figure}
+\section{Plot samples}
+All interactive elements, animated plots, and full versions of plots can be found at \href{https://link.to/plots}{https://link.to/plots}.
+
+\begin{figure} [h]
+    \centering
+    \caption{Short-term Long-term Disparity Exercise}
+    \label{fig:single-stock-two-weeks}
+    \begin{subfigure}[b]{0.48\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{figs/single_stock_two_weeks1.pdf}
+        \caption{Sample A}
+        \label{fig:single-stock-two-weeks-sample1}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{figs/single_stock_two_weeks2.pdf}
+        \caption{Sample B}
+        \label{fig:single-stock-two-weeks-sample2}
+    \end{subfigure}
+    \begin{subfigure}[c]{0.94\linewidth}
+      \centering
+      \includegraphics[width=\linewidth]{figs/single_stock_two_weeks3.pdf}
+      \caption{Full stock sample}
+      \label{fig:single-stock-two-weeks-sample3}
+    \end{subfigure}\\
+    A button can be pressed to pick a random span of two weeks~[\autoref{fig:single-stock-two-weeks-sample1},\autoref{fig:single-stock-two-weeks-sample2}], the user then picks a perceived order of performance of the stocks at which point the full history is unlocked [\autoref{fig:single-stock-two-weeks-sample3}]
+\end{figure}
+
+\begin{figure} [h]
+    \centering
+    \caption{Daily Industry Performance Heatmap}
+    \includegraphics[width=1\linewidth]{figs/heatmap_sample.pdf}
+    \label{fig:heatmap_sampe}
+\end{figure}
+
+\begin{figure} [h]
+    \centering
+    \caption{Quarterly Sector Performance Bars}
+    \label{fig:bar_sampe}
+    \begin{subfigure}[b]{1\linewidth}
+        \centering
+        \caption{Without 2019 ticks.}
+        \includegraphics[width=1\linewidth]{figs/bar_sample2.pdf}
+        \label{fig:bar_sampe1}
+    \end{subfigure}
+    \begin{subfigure}[b]{1\linewidth}
+        \centering
+        \caption{With 2019 ticks.}
+        \includegraphics[width=1\linewidth]{figs/bar_sample.pdf}
+        \label{fig:bar_sampe2}
+    \end{subfigure}\\
+    The interactive element allows for triggering of the quarterly comparison to 2019.
+  \end{figure}
+
+\begin{figure} [h]
+    \centering
+    \caption{Overall Animated Spiral of Performance}
+    \label{fig:spiral_sample}
+    \begin{subfigure}[b]{0.48\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{figs/spiral1.png}
+        \caption{Sample 1}
+        \label{fig:sprial_sample1}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{figs/spiral2.png}
+        \caption{Sample 2}
+        \label{fig:spiral_sample2}
+    \end{subfigure}\\
+    The animation is the line being drawn as time passes as well as a bar indicating current return since beginning and maximum gain and loss. The color of the line is based on the daily gains and losses and fades into gray after a certain number of days.
+  \end{figure}
 
 \end{document}
