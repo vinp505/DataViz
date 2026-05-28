@@ -750,7 +750,7 @@ if st.session_state["finalized"]:
 # -----------------------------------------------------------
 
     st.space(20)
-    st.header("P4 — 2019-2025 Market Evolution — overall percentage change in average value animated spiral", anchor= False)
+    st.header("P4 — 2019-2025 Market Evolution Animated Spiral — overall percentage change in average value", anchor= False)
     
     # text formatted by Gemini
     st.markdown(
