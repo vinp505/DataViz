@@ -16,6 +16,78 @@ from pathlib import Path
 
 current_dir = Path(__file__).resolve().parent
 
+import streamlit as st
+
+# -------------------------------------------------------------------------------
+
+# Gemini generated block for mobile devices
+mobile_blocker_html = """
+<!-- 1. The custom full-screen blocker container -->
+<div class="mobile-blocker">
+    <h2>Desktop Only</h2>
+    <p>
+        This interactive data visualization is not intended for mobile devices.<br>
+        Please open this page on a computer to browse the page.
+    </p>
+</div>
+
+<!-- 2. The CSS to handle the responsive display swap -->
+<style>
+/* By default, our custom blocker is completely hidden on desktops */
+.mobile-blocker {
+    display: none;
+}
+
+/* If the user's screen is smaller than 1024px (tablets and mobiles) */
+@media (max-width: 1024px) {
+    
+    /* A. Hide the entire main Streamlit app content */
+    div[data-testid="stMainBlockContainer"] {
+        display: none !important;
+    }
+    
+    /* B. Hide the sidebar if you have one */
+    section[data-testid="stSidebar"] {
+        display: none !important;
+    }
+    
+    /* C. Show our clean, full-screen locked page instead */
+    .mobile-blocker {
+        display: flex !important;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background-color: #FAF9F6; /* Matches your warm background */
+        z-index: 999999;           /* Sits on top of all other elements */
+        text-align: center;
+        padding: 40px;
+        box-sizing: border-box;
+        font-family: sans-serif;
+    }
+    
+    .mobile-blocker h2 {
+        color: #BF8755; /* Your custom warm bronze color */
+        font-size: 28px;
+        font-weight: bold;
+        margin-bottom: 15px;
+    }
+    
+    .mobile-blocker p {
+        color: #000000;
+        font-size: 16px;
+        line-height: 1.5;
+    }
+}
+</style>
+"""
+
+st.markdown(mobile_blocker_html, unsafe_allow_html=True)
+
 # -------------------------------------------------------------------------------
 
 st.set_page_config(layout="wide")
@@ -651,7 +723,7 @@ if st.session_state["finalized"]:
             The barplot presents quarterly sector performance, now showing broader market trends.<br/>
             Negative quarters likely indicate systematic regression in price, rather than a temporary independent negative moment for specific industries or stocks, adding more context to long-term performance analysis.<br/>
             Each bar represents the change, in percentage, of the mean price across all sector-specific stocks from the last day of the previous quarter to the last day of the current quarter: positive values indicate that the average company is worth more at the end of the given quarter than it was at the end of the previous.<br/>
-            After observing the graph, it is possible to add the sector-specific mean price percentage change from the beginning of 2019 for each quarter by clicking the button.<br/>
+            After observing the graph, the sector-specific mean price percentage change from the beginning of 2019 for each quarter can be overlayed by clicking the button.<br/>
             It is then possible to compare the perceived overall health and profitability of a sector on a quarterly basis with its long-term trends: are 3-month periods enough to determine the extended reliability of a sector?
         </p>
         """,
