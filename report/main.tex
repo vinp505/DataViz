@@ -50,9 +50,6 @@
   tabsize=3
 }
 
-\setlength{\textwidth}{7in}
-\setlength{\textheight}{8.8in}
-
 % --- Fix for missing ACL template definitions ---
 % 1. Define the missing titlebox length
 \newlength\titlebox
@@ -112,25 +109,25 @@
 \maketitle
 \section{Introduction}
 \label{sec:intro}
-We present four visualisations of historic stock market data~\cite{defeatbeta_yahoo_finance_data} from January 2019 to December 2025. These visualisations are ordered in terms of data granularity and are meant to represent different views of the stock market, from subjective personal feelings to objective hard realities. The first visualisation is an interactive exercise showing the disparity between short-term and long-term single-stock performance using line charts. The second visualisation is a heatmap of aggregate industry performance meant to express the waves of feelings that one experiences when trading day-to-day. The third is a bar chart showcasing quarterly sector performance starting to reveal the objective market performance. And lastly is an animated spiral line chart showing the true unfiltered reality of aggregate market performance.
+We present four visualisations of historic stock market data~\cite{defeatbeta_yahoo_finance_data} from January 2019 to December 2025. These visualisations are ordered in terms of data granularity and are meant to represent different views of the stock market, from subjective personal feelings to objective hard realities. This is done to bridge the mental gap between a trader looking at their portfolio performance and the broader trends of the market, to allow for easier rationalization of their trading decisions. The first visualisation is an interactive exercise showing the disparity between short-term and long-term single-stock performance using line charts. The second visualisation is a heatmap of aggregate industry performance meant to express the waves of gains and losses. The third is a bar chart showcasing quarterly sector performance revealing the broader market trends. And lastly is an animated spiral line chart showing the broadest reality of aggregate market performance.
 
 \section{Data Pre-processing}
-Data is first adjusted for inflation to the 2025 US Dollar. The data is then filtered based on the starting closing price of each stock and the average volume of each stock, keeping stocks above the 20th percentile for each parameter. This is done to prevent penny stocks from skewing the average price and change in percentage, especially as their importance in the market is highly negligible and only relevant for a small group of people and businesses.
+Data is first adjusted for inflation to the 2025 US Dollar. The data is then filtered based on the starting closing price of each stock and the average trading volume, keeping stocks above the 20th percentile, from either its industry, sector, or global group depending on the plot. This is done to prevent penny stocks from skewing the average price and change in percentage, especially as their market importance is highly negligible and only relevant for a small group of people and businesses.
 
 \section{Chart Decisions and Justification}
-When actively engaging in trading it is hard to rationalize the relatively short-term losses while seeing the overall performance of your portfolio, as even if you are up 15\% in the year a sudden 5\% loss feels devastating even if you are still up overall. Therefore, we decided to try and visualise this juxtaposition of subjective day-to-day feelings and objective long-term realities to implore the reader to stay level-headed when faced with short-term challenges whether trading stocks or in everyday life.
+When actively engaging in trading it is hard to rationalize the relatively short-term losses while seeing the overall performance of your portfolio, as even if you are up 15\% in the year a seemingly sudden 5\% loss feels like your choices of trades are wrong, not realizing the possibility of a broader market slowdown. Therefore, we decided to try to visualise this juxtaposition of subjective day-to-day feelings and objective longer-term and broader realities to implore the reader to stay level-headed when faced with short-term challenges whether trading stocks or in everyday life.
 
 \subsection{Short-term Long-term Disparity Exercise}
 With this exercise we use multiple single-stock line charts to try to model the day-to-day experience of trading stocks; looking at lines going up or down, trying to remain optimistic that your choices will result in profit and not loss, but also grounded when short-term spikes occur.
 
 \subsection{Daily Industry Performance Heatmap}
-With this chart we attempt to show the feeling associated with a slightly longer term and broader context, because once you get over the day-to-day single-stock market swings effecting your feelings you start diversifying and looking at slightly longer periods. Thus, we move from the day-to-day comparison of single-stocks to aggregate industry performance month-to-month, showcasing the waves that gains and losses come in.
+Showcases the waves of gains and losses across industries, showing the slightly broader and longer term context that is effecting your stock picks. Thus, allowing for more rational thinking about single-stock performance in the industries.
 
 \subsection{Quarterly Sector Performance Bars}
-We start moving to the objective realities showing broad market trends per sector at a quarter-to-quarter basis as well as a comparison to the beginning. This level of broadness now shows real market trends with negative quarters likely being indicators of systematic regression in price rather than a momentary slow-down.
+Shows broad market trends per sector quarter-to-quarter and all time. This level of broadness now shows real market trends with negative quarters likely being indicators of systematic regression in price rather than a momentary slow-down putting more context to industry and single-stock longer-term performance.
 
 \subsection{Overall Animated Spiral of Performance}
-Made as an alternative to a stacked line chart, the spiral allows for comparison of daily aggregate stock trends and performance across years using a continuous line rather than disconnected lines, allowing for animation. It shows us the highs and lows of trading for each year but also across multiple years showcasing the highest level of objectivity.
+Made as an alternative to a stacked line chart, the spiral allows for comparison of daily aggregate stock trends and performance across years using a continuous line rather than disconnected lines, allowing for animation. It shows us the highs and lows of trading for each year but also across multiple years. This provides full long-term context about the gains or losses of sectors and industries in any period of time as well as serves as point of comparison for the performance of your own portfolio to the total market performance.
 
 
 \bibliographystyle{apalike}
