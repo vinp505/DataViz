@@ -255,7 +255,7 @@ def generate_heatmap(sector_mom):
         interpolation='none',
     )
 
-    if True:
+    if False:
         tick_pos = [0]
         x_labels = ['2019']
         last_month = '12'
