@@ -787,7 +787,7 @@ if st.session_state["finalized"]:
 
     st.space(3)
 
-    col1, col2, col3 = st.columns([2, 5, 2], vertical_alignment="center")
+    col1, col2, col3 = st.columns([1.5, 6, 1.5], vertical_alignment="center")
     
     with col2:
         st.video(
