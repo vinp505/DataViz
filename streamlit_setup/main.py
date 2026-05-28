@@ -495,7 +495,7 @@ if st.session_state["finalized"]:
             }
             .loading-skeleton {
                 width: 100%;
-                height: 450px;
+                height: 400px;
                 background-color: #FAF9F6; 
                 border: 2px dashed #BF8755;
                 border-radius: 8px;
@@ -522,7 +522,7 @@ if st.session_state["finalized"]:
         fig = generate_final_lineplot(df_list, color_list, name_list, x_ticks, x_labels)
         
         # store the html code for the plot in the parameters, display it on the placeholder
-        st.session_state["final_lineplot_html"] = get_open_scrollable_svg_html_inverted(fig, height= 450)
+        st.session_state["final_lineplot_html"] = get_open_scrollable_svg_html_inverted(fig, height= 400)
         plot_placeholder_2.write(st.session_state["final_lineplot_html"], unsafe_allow_html=True)
         plt.close(fig)
         
